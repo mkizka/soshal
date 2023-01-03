@@ -1,4 +1,5 @@
 FROM node:18-slim
+WORKDIR /code
 RUN npm i -g npm pnpm
 COPY package.json pnpm-lock.yaml ./
 COPY prisma ./prisma
