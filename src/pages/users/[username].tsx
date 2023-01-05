@@ -1,5 +1,5 @@
 import { GetServerSideProps } from "next";
-import { prisma } from "../../server/db/client";
+import { prisma } from "../../server/db";
 
 const User = (props: any) => {
   return <p>{props.message}</p>;

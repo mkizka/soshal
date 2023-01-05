@@ -79,6 +79,9 @@ const AuthShowcase: React.FC = () => {
       >
         {sessionData ? "Sign out" : "Sign in"}
       </button>
+      <Link href="/changemyname" style={{ color: "white" }}>
+        名前を変更
+      </Link>
     </div>
   );
 };
