@@ -55,6 +55,8 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
+  publicKey     String?
+  privateKey    String?
 }
 
 model VerificationToken {
