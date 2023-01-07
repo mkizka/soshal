@@ -52,12 +52,8 @@ export const getServerSideProps: GetServerSideProps = async ({
         icon: {
           type: "Image",
           mediaType: "image/png",
-          // url: user.iconUrl,
-        },
-        image: {
-          type: "Image",
-          mediaType: "image/png",
-          // url: user.imageUrl,
+          // TODO: fix
+          url: "https://github.com/mkizka.png",
         },
       })
     );
