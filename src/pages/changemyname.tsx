@@ -11,9 +11,9 @@ const ChangeMyName = () => {
     const newName = ref.current?.value || "";
     if (newName.length > 0) {
       mutation.mutate({ name: newName });
+      location.reload();
     }
   };
-  console.log(1);
   return (
     <form onSubmit={change}>
       <p>
