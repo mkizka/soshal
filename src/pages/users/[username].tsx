@@ -47,7 +47,7 @@ export const getServerSideProps: GetServerSideProps = async ({
           id: userId,
           type: "Key",
           owner: userId,
-          // publicKeyPem: user.publicKeyPem,
+          publicKeyPem: user.publicKey,
         },
         icon: {
           type: "Image",
