@@ -57,6 +57,7 @@ model User {
   sessions      Session[]
   publicKey     String?
   privateKey    String?
+  notes         Note[]
 }
 
 model VerificationToken {
@@ -65,4 +66,12 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content   String
+  createdAt DateTime @default(now())
 }

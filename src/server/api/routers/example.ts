@@ -43,4 +43,17 @@ export const exampleRouter = createTRPCRouter({
       },
     });
   }),
+
+  addNote: protectedProcedure.mutation(async ({ ctx }) => {
+    await ctx.prisma.note.create({
+      data: {
+        userId: ctx.session.user.id,
+        content: `${new Date().toISOString()}`,
+      },
+    });
+  }),
+
+  getAllNotes: protectedProcedure.query(({ ctx }) => {
+    return ctx.prisma.note.findMany();
+  }),
 });
