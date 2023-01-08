@@ -13,6 +13,7 @@ specifiers:
   '@types/react-dom': ^18.0.10
   '@typescript-eslint/eslint-plugin': ^5.47.1
   '@typescript-eslint/parser': ^5.47.1
+  activitypub-core-types: ^0.1.1
   eslint: ^8.30.0
   eslint-config-next: 13.1.1
   next: 13.1.1
@@ -47,6 +48,7 @@ devDependencies:
   '@types/react-dom': 18.0.10
   '@typescript-eslint/eslint-plugin': 5.48.0_k73wpmdolxikpyqun3p36akaaq
   '@typescript-eslint/parser': 5.48.0_iukboom6ndih5an6iafl45j2fe
+  activitypub-core-types: 0.1.1
   eslint: 8.31.0
   eslint-config-next: 13.1.1_iukboom6ndih5an6iafl45j2fe
   prisma: 4.8.0
@@ -561,6 +563,10 @@ packages:
     resolution: {integrity: sha512-7zFpHzhnqYKrkYdUjF1HI1bzd0VygEGX8lFk4k5zVMqHEoES+P+7TKI+EvLO9WVMJ8eekdO0aDEK044xTXwPPA==}
     engines: {node: '>=0.4.0'}
     hasBin: true
+    dev: true
+
+  /activitypub-core-types/0.1.1:
+    resolution: {integrity: sha512-agiH5qmid7El0I119wM2oHWYTBIAqolEp+W4axkvbIY0KBqGyOum0r1ftUh8cB+MHhoQ3K20pNrUvqChuzvaVg==}
     dev: true
 
   /ajv/6.12.6:

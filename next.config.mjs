@@ -17,7 +17,7 @@ const config = {
     return [
       {
         source: "/@:username",
-        destination: "/users/:username",
+        destination: "/users/@:username",
       },
     ];
   },
