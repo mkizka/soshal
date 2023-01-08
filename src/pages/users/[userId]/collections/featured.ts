@@ -1,6 +1,6 @@
 import type { GetServerSideProps } from "next";
-import { prisma } from "../../../server/db";
-import { activityStreams } from "../../../utils/activitypub";
+import { prisma } from "../../../../server/db";
+import { activityStreams } from "../../../../utils/activitypub";
 
 // eslint-disable-next-line import/no-anonymous-default-export
 export default () => null;
@@ -24,12 +24,12 @@ export const getServerSideProps: GetServerSideProps = async ({
   if (user == null) {
     return { notFound: true };
   }
-  const outboxId = `https:/${req.headers.host}/users/${user.id}/outbox`;
+  const id = `https:/${req.headers.host}/users/${user.id}/collections/featured`;
   res.setHeader("Content-Type", "application/activity+json");
   res.write(
     JSON.stringify({
       "@context": ["https://www.w3.org/ns/activitystreams"],
-      id: outboxId,
+      id: id,
       type: "OrderedCollection",
       totalItems: user.notes.length,
       orderedItems: user.notes.map((note) =>

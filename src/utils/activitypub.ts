@@ -6,7 +6,9 @@ const required = <T>(value: T | null | undefined) => {
   return value;
 };
 
-const convertUser = (user: User, host: string): AP.Person => {
+type CustomPerson = AP.Person & { featured?: AP.OrderedCollectionReference };
+
+const convertUser = (user: User, host: string): CustomPerson => {
   const userAddress = `https://${host}/users/${user.id}`;
   return {
     "@context": [
@@ -19,6 +21,7 @@ const convertUser = (user: User, host: string): AP.Person => {
     outbox: new URL(`${userAddress}/outbox`),
     following: new URL(`${userAddress}/following`),
     followers: new URL(`${userAddress}/followers`),
+    featured: new URL(`${userAddress}/collections/featured`),
     preferredUsername: required(user.name),
     name: required(user.name),
     url: new URL(userAddress),
