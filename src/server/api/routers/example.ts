@@ -44,16 +44,24 @@ export const exampleRouter = createTRPCRouter({
     });
   }),
 
-  addNote: protectedProcedure.mutation(async ({ ctx }) => {
-    await ctx.prisma.note.create({
-      data: {
-        userId: ctx.session.user.id,
-        content: `${new Date().toISOString()}`,
-      },
-    });
-  }),
+  addNote: protectedProcedure
+    .input(z.string())
+    .mutation(async ({ ctx, input }) => {
+      await ctx.prisma.note.create({
+        data: {
+          userId: ctx.session.user.id,
+          content: input,
+        },
+      });
+    }),
 
   getAllNotes: protectedProcedure.query(({ ctx }) => {
     return ctx.prisma.note.findMany();
   }),
+
+  deleteNote: protectedProcedure
+    .input(z.string())
+    .mutation(({ ctx, input }) => {
+      return ctx.prisma.note.delete({ where: { id: input } });
+    }),
 });

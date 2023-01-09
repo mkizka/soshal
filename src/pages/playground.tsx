@@ -44,15 +44,30 @@ const ResetMe = () => {
 };
 
 const AddNote = () => {
-  const mutation = api.example.addNote.useMutation();
+  const context = api.useContext();
+  const mutation = api.example.addNote.useMutation({
+    onSuccess() {
+      context.example.invalidate();
+    },
+  });
+  const deleteMutation = api.example.deleteNote.useMutation({
+    onSuccess() {
+      context.example.invalidate();
+    },
+  });
+  const ref = useRef<HTMLInputElement>(null);
   const { data: notes } = api.example.getAllNotes.useQuery();
   return (
     <div>
-      <button onClick={() => mutation.mutate()}>Noteを追加</button>
+      <input ref={ref} />
+      <button onClick={() => mutation.mutate(ref.current?.value || "入力なし")}>
+        Noteを追加
+      </button>
       {notes &&
         notes.map((note) => (
           <p key={note.id}>
             {note.id}: {note.content}
+            <button onClick={() => deleteMutation.mutate(note.id)}>削除</button>
           </p>
         ))}
     </div>

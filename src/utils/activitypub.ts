@@ -6,7 +6,9 @@ const required = <T>(value: T | null | undefined) => {
   return value;
 };
 
-type CustomPerson = AP.Person & { featured?: AP.OrderedCollectionReference };
+type CustomPerson = AP.Person & {
+  featured?: AP.OrderedCollectionReference;
+};
 
 const convertUser = (user: User, host: string): CustomPerson => {
   const userAddress = `https://${host}/users/${user.id}`;
@@ -31,7 +33,10 @@ const convertUser = (user: User, host: string): CustomPerson => {
       publicKeyPem: required(user.publicKey),
     },
     // TODO: user.iconを追加する
-    icon: new URL("https://github.com/mkizka.png"),
+    icon: {
+      type: "Image",
+      url: new URL("https://github.com/mkizka.png"),
+    } as AP.Image, // なぜか型エラーになる,
   };
 };
 
