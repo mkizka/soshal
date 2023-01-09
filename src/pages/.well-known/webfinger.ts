@@ -1,4 +1,5 @@
 import { GetServerSideProps } from "next";
+import { env } from "../../env/server.mjs";
 import { prisma } from "../../server/db";
 
 export default () => {};
@@ -13,7 +14,7 @@ export const getServerSideProps: GetServerSideProps = async ({
       query.resource &&
       typeof query.resource == "string" &&
       query.resource.startsWith("acct:") &&
-      query.resource.endsWith(`@${req.headers.host}`)
+      query.resource.endsWith(`@${new URL(env.HOST).hostname}`)
     )
   ) {
     return { notFound: true };
@@ -35,7 +36,7 @@ export const getServerSideProps: GetServerSideProps = async ({
         {
           rel: "self",
           type: "application/activity+json",
-          href: `https://${req.headers.host}/@${name}`,
+          href: `${env.HOST}/@${name}`,
         },
       ],
     })

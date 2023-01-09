@@ -19,6 +19,14 @@ export const serverSchema = z.object({
     // VERCEL_URL doesn't include `https` so it cant be validated as a URL
     process.env.VERCEL ? z.string() : z.string().url()
   ),
+
+  HOST: z
+    .string()
+    .url()
+    // NEXTAUTH_URLがundefinedだった場合はパースの段階でエラーになるので無視してよい
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    .default(process.env.NEXTAUTH_URL),
   EMAIL_SERVER_USER: z.string(),
   EMAIL_SERVER_PASS: z.string(),
   EMAIL_SERVER_HOST: z.string(),

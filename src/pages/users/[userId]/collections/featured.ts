@@ -1,4 +1,5 @@
 import type { GetServerSideProps } from "next";
+import { env } from "../../../../env/server.mjs";
 import { prisma } from "../../../../server/db";
 import { activityStreams } from "../../../../utils/activitypub";
 
@@ -6,7 +7,6 @@ import { activityStreams } from "../../../../utils/activitypub";
 export default () => null;
 
 export const getServerSideProps: GetServerSideProps = async ({
-  req,
   res,
   params,
 }) => {
@@ -24,7 +24,7 @@ export const getServerSideProps: GetServerSideProps = async ({
   if (user == null) {
     return { notFound: true };
   }
-  const id = `https:/${req.headers.host}/users/${user.id}/collections/featured`;
+  const id = `${env.HOST}/users/${user.id}/collections/featured`;
   res.setHeader("Content-Type", "application/activity+json");
   res.write(
     JSON.stringify({
@@ -32,9 +32,7 @@ export const getServerSideProps: GetServerSideProps = async ({
       id: id,
       type: "OrderedCollection",
       totalItems: user.notes.length,
-      orderedItems: user.notes.map((note) =>
-        activityStreams.note(note, req.headers.host || "")
-      ),
+      orderedItems: user.notes.map(activityStreams.note),
     })
   );
   res.end();

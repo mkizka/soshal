@@ -1,5 +1,6 @@
 import type { User, Note } from "@prisma/client";
 import type { AP } from "activitypub-core-types";
+import { env } from "../env/server.mjs";
 
 const required = <T>(value: T | null | undefined) => {
   if (value === null || value === undefined) throw new Error("値が必要です");
@@ -10,8 +11,8 @@ type CustomPerson = AP.Person & {
   featured?: AP.OrderedCollectionReference;
 };
 
-const convertUser = (user: User, host: string): CustomPerson => {
-  const userAddress = `https://${host}/users/${user.id}`;
+const convertUser = (user: User): CustomPerson => {
+  const userAddress = `${env.HOST}/users/${user.id}`;
   return {
     "@context": [
       new URL("https://www.w3.org/ns/activitystreams"),
@@ -40,11 +41,11 @@ const convertUser = (user: User, host: string): CustomPerson => {
   };
 };
 
-const convertNote = (note: Note, host: string): AP.Note => {
-  const userAddress = `https://${host}/users/${note.userId}`;
+const convertNote = (note: Note): AP.Note => {
+  const userAddress = `${env.HOST}/users/${note.userId}`;
   return {
     "@context": new URL("https://www.w3.org/ns/activitystreams"),
-    id: new URL(`https://${host}/notes/${note.id}`),
+    id: new URL(`${env.HOST}/notes/${note.id}`),
     type: "Note",
     content: note.content,
     attributedTo: new URL(userAddress),
@@ -54,7 +55,7 @@ const convertNote = (note: Note, host: string): AP.Note => {
   };
 };
 
-const convertCreate = (apNote: AP.Note, host: string): AP.Create => {
+const convertCreate = (apNote: AP.Note): AP.Create => {
   return {
     // TODO: wip
     type: "Create",
