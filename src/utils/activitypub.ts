@@ -39,7 +39,7 @@ const convertNote = (note: Note, host: string): AP.Note => {
   const userAddress = `https://${host}/users/${note.userId}`;
   return {
     "@context": new URL("https://www.w3.org/ns/activitystreams"),
-    id: new URL(`https://${host}/n/${note.id}`),
+    id: new URL(`https://${host}/notes/${note.id}`),
     type: "Note",
     content: note.content,
     attributedTo: new URL(userAddress),
