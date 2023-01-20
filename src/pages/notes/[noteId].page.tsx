@@ -27,7 +27,6 @@ export const getServerSideProps: GetServerSideProps = async ({
   }
   if (req.headers.accept?.includes("application/activity+json")) {
     res.setHeader("Content-Type", "application/activity+json");
-    // TODO: hostを環境変数で受け取る
     res.write(JSON.stringify(activityStreams.note(note)));
     res.end();
   }
