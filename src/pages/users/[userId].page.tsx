@@ -1,9 +1,9 @@
 import type { GetServerSideProps } from "next";
-import type { AP } from "activitypub-core-types";
 import { prisma } from "../../server/db";
 import { activityStreams } from "../../utils/activitypub";
 import { env } from "../../env/server.mjs";
 import { z } from "zod";
+import { logger } from "../../utils/logger";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const User = (props: any) => {
@@ -16,20 +16,39 @@ const User = (props: any) => {
 
 export default User;
 
-type WebFingerResponse = {
-  subject?: string;
-  links?: {
-    rel?: string;
-    href?: string;
-  }[];
-};
-
 const safeUrl = (...args: ConstructorParameters<typeof URL>) => {
   try {
     return new URL(...args);
   } catch {
     return null;
   }
+};
+
+const fetchJson = (...[input, ...args]: Parameters<typeof fetch>) => {
+  return fetch(input, ...args)
+    .then((response) => {
+      if (!response.ok) {
+        logger.warn(
+          `${input} へのリクエストで${response.status}が返されました`
+        );
+        return null;
+      }
+      return response.json() as Promise<object>;
+    })
+    .catch(() => {
+      logger.warn(
+        `${input} への通信に失敗したかレスポンスがパース出来ませんでした: `
+      );
+      return null;
+    });
+};
+
+const resolveWebFingerResponse = (data: object) => {
+  const href =
+    "links" in data &&
+    Array.isArray(data.links) &&
+    data.links.find((link) => link?.rel == "self")?.href;
+  return safeUrl(href);
 };
 
 /**
@@ -42,18 +61,11 @@ const fetchHrefByWebFinger = async (name: string, host: string) => {
   }
   const url = new URL("/.well-known/webfinger", targetUrl);
   url.searchParams.append("resource", `acct:${name}@${targetUrl.hostname}`);
-  const response = await fetch(url);
-  if (!response.ok) {
+  const response = await fetchJson(url);
+  if (!response) {
     return null;
   }
-  const data = (await response.json()) as WebFingerResponse;
-  const href =
-    Array.isArray(data.links) &&
-    data.links.find((link) => link?.rel == "self")?.href;
-  if (!href) {
-    return null;
-  }
-  return safeUrl(href);
+  return resolveWebFingerResponse(response);
 };
 
 const personSchema = z.object({
@@ -71,16 +83,12 @@ const personSchema = z.object({
 });
 
 const fetchValidPerson = async (url: URL) => {
-  const response = await fetch(url, {
+  const response = await fetchJson(url, {
     headers: {
       accept: "application/activity+json",
     },
   });
-  if (!response.ok) {
-    return null;
-  }
-  const person = (await response.json()) as AP.Person;
-  const parsed = personSchema.safeParse(person);
+  const parsed = personSchema.safeParse(response);
   if (!parsed.success) {
     return null;
   }
@@ -102,6 +110,7 @@ const getOrFetchRemoteUser = async (name: string, host?: string) => {
   }
   const person = await fetchValidPerson(url);
   if (!person) {
+    logger.warn(`Personの値が不正です`);
     return null;
   }
   const existingUser = await prisma.user.findFirst({
@@ -154,6 +163,7 @@ export const getServerSideProps: GetServerSideProps = async ({
   }
   if (req.headers.accept?.includes("application/activity+json")) {
     res.setHeader("Content-Type", "application/activity+json");
+    // TODO: リモートユーザーの場合はどうする？
     res.write(JSON.stringify(activityStreams.user(user)));
     res.end();
   }
