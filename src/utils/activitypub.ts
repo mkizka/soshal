@@ -12,7 +12,7 @@ type CustomPerson = AP.Person & {
 };
 
 const convertUser = (user: User): CustomPerson => {
-  const userAddress = `${env.HOST}/users/${user.id}`;
+  const userAddress = `https://${env.HOST}/users/${user.id}`;
   return {
     "@context": [
       new URL("https://www.w3.org/ns/activitystreams"),
@@ -42,10 +42,10 @@ const convertUser = (user: User): CustomPerson => {
 };
 
 const convertNote = (note: Note): AP.Note => {
-  const userAddress = `${env.HOST}/users/${note.userId}`;
+  const userAddress = `https://${env.HOST}/users/${note.userId}`;
   return {
     "@context": new URL("https://www.w3.org/ns/activitystreams"),
-    id: new URL(`${env.HOST}/notes/${note.id}`),
+    id: new URL(`https://${env.HOST}/notes/${note.id}`),
     type: "Note",
     content: note.content,
     attributedTo: new URL(userAddress),

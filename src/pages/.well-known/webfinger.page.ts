@@ -14,7 +14,7 @@ export const getServerSideProps: GetServerSideProps = async ({
       query.resource &&
       typeof query.resource == "string" &&
       query.resource.startsWith("acct:") &&
-      query.resource.endsWith(`@${new URL(env.HOST).hostname}`)
+      query.resource.endsWith(`@${env.HOST}`)
     )
   ) {
     return { notFound: true };
@@ -36,7 +36,7 @@ export const getServerSideProps: GetServerSideProps = async ({
         {
           rel: "self",
           type: "application/activity+json",
-          href: `${env.HOST}/@${name}`,
+          href: `https://${env.HOST}/@${name}`,
         },
       ],
     })

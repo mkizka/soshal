@@ -22,11 +22,10 @@ export const serverSchema = z.object({
 
   HOST: z
     .string()
-    .url()
     // NEXTAUTH_URLがundefinedだった場合はパースの段階でエラーになるので無視してよい
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    .default(process.env.NEXTAUTH_URL),
+    .default(new URL(process.env.NEXTAUTH_URL).hostname),
   EMAIL_SERVER_USER: z.string(),
   EMAIL_SERVER_PASS: z.string(),
   EMAIL_SERVER_HOST: z.string(),

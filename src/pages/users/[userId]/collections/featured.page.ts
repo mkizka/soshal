@@ -24,7 +24,7 @@ export const getServerSideProps: GetServerSideProps = async ({
   if (user == null) {
     return { notFound: true };
   }
-  const id = `${env.HOST}/users/${user.id}/collections/featured`;
+  const id = `https://${env.HOST}/users/${user.id}/collections/featured`;
   res.setHeader("Content-Type", "application/activity+json");
   res.write(
     JSON.stringify({
