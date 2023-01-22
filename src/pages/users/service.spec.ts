@@ -40,35 +40,33 @@ describe("getUserById", () => {
   });
   describe("正常系(リモートユーザー)", () => {
     test.each`
-      userId                         | expected     | description
-      ${"@dummy@remote.example.com"} | ${dummyUser} | ${"他ホストかつ未取得ユーザーの場合はWebFingerを叩いて保存する"}
-    `("$userId: $description", async ({ userId, expected }) => {
-      // arrange
-      nock("https://remote.example.com")
-        .get("/.well-known/webfinger")
-        .query({
-          resource: "acct:dummy@remote.example.com",
-        })
-        .reply(200, {
-          links: [
-            { rel: "self", href: "https://remote.example.com/users/dummyId" },
-          ],
-        })
-        .get("/users/dummyId")
-        .reply(200, { preferredUsername: "dummy" });
-      prismaMock.user.findFirst.mockResolvedValue(null);
-      prismaMock.user.create.mockResolvedValue(dummyUser);
-      // act
-      const user = await findOrFetchUserById(userId);
-      // assert
-      expect(prismaMock.user.create).toHaveBeenCalledWith({
-        data: {
-          name: "dummy",
-          image: "",
-          publicKey: "",
-        },
-      });
-      expect(user).toEqual(expected);
-    });
+      userId                         | findFirstResult | createCalledTimes | expected     | description
+      ${"@dummy@remote.example.com"} | ${null}         | ${1}              | ${dummyUser} | ${"他ホストの場合はWebFingerを叩いて、新規ユーザーなら保存する"}
+      ${"@dummy@remote.example.com"} | ${dummyUser}    | ${0}              | ${dummyUser} | ${"他ホストの場合はWebFingerを叩いて、既存ユーザーならDBから引く"}
+    `(
+      "$userId: $description",
+      async ({ userId, findFirstResult, createCalledTimes, expected }) => {
+        // arrange
+        nock("https://remote.example.com")
+          .get("/.well-known/webfinger")
+          .query({
+            resource: "acct:dummy@remote.example.com",
+          })
+          .reply(200, {
+            links: [
+              { rel: "self", href: "https://remote.example.com/users/dummyId" },
+            ],
+          })
+          .get("/users/dummyId")
+          .reply(200, { preferredUsername: "dummy" });
+        prismaMock.user.findFirst.mockResolvedValue(findFirstResult);
+        prismaMock.user.create.mockResolvedValue(dummyUser);
+        // act
+        const user = await findOrFetchUserById(userId);
+        // assert
+        expect(prismaMock.user.create).toBeCalledTimes(createCalledTimes);
+        expect(user).toEqual(expected);
+      }
+    );
   });
 });
