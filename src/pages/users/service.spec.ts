@@ -142,5 +142,27 @@ describe("getUserById", () => {
       expect(scope.isDone()).toBe(true);
       expect(user).toEqual(null);
     });
+    test("hostのhrefから有効なデータが返されなかった場合はnullを返す", async () => {
+      // arrange
+      const webFingerScope = nock("https://remote.example.com")
+        .get("/.well-known/webfinger")
+        .query({
+          resource: "acct:dummy@remote.example.com",
+        })
+        .reply(200, {
+          links: [
+            { rel: "self", href: "https://remote.example.com/users/dummyId" },
+          ],
+        });
+      const remoteUserScope = nock("https://remote.example.com")
+        .get("/users/dummyId")
+        .reply(200, { invalid: "dummy" });
+      // act
+      const user = await findOrFetchUserById("@dummy@remote.example.com");
+      // assert
+      expect(webFingerScope.isDone()).toBe(true);
+      expect(remoteUserScope.isDone()).toBe(true);
+      expect(user).toEqual(null);
+    });
   });
 });
