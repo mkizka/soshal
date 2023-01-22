@@ -1,4 +1,6 @@
 import { z } from "zod";
+import type { Options } from "got";
+import got from "got";
 import { logger } from "../../utils/logger";
 
 export const safeUrl = (...args: ConstructorParameters<typeof URL>) => {
@@ -9,23 +11,43 @@ export const safeUrl = (...args: ConstructorParameters<typeof URL>) => {
   }
 };
 
-export const fetchJson = (...[input, ...args]: Parameters<typeof fetch>) => {
-  return fetch(input, ...args)
-    .then((response) => {
-      if (!response.ok) {
-        logger.warn(
-          `${input} へのリクエストで${response.status}が返されました`
-        );
-        return null;
-      }
-      return response.json() as Promise<object>;
-    })
-    .catch(() => {
-      logger.warn(
-        `${input} への通信に失敗したかレスポンスがパース出来ませんでした: `
-      );
-      return null;
+// export const fetchJson = (...[input, ...args]: Parameters<typeof fetch>) => {
+//   return fetch(input, ...args)
+//     .then((response) => {
+//       if (!response.ok) {
+//         logger.warn(
+//           `${input} へのリクエストで${response.status}が返されました`
+//         );
+//         return null;
+//       }
+//       return response.json() as Promise<object>;
+//     })
+//     .catch((error) => {
+//       logger.warn(
+//         `${input} への通信に失敗したかレスポンスがパース出来ませんでした: `
+//       );
+//       logger.error(error);
+//       return null;
+//     });
+// };
+
+export const fetchJson = async <T extends object>(
+  url: string | URL,
+  options?: Options
+) => {
+  try {
+    return await got<T>(url, {
+      ...options,
+      isStream: false,
+      resolveBodyOnly: false,
+      responseType: "json",
     });
+  } catch (e) {
+    if (e instanceof got.HTTPError) {
+      logger.warn(`${e.code}: ${url}`);
+    }
+    return null;
+  }
 };
 
 export const personSchema = z.object({

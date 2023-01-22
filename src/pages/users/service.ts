@@ -25,7 +25,13 @@ const fetchHrefByWebFinger = async (name: string, host: string) => {
   if (!response) {
     return null;
   }
-  return resolveWebFingerResponse(response);
+  const href = resolveWebFingerResponse(response.body);
+  if (!href) {
+    logger.warn(
+      `${name}@${host} のWebFingerから有効なhrefが取得できませんでした`
+    );
+  }
+  return href;
 };
 
 const fetchValidPerson = async (url: URL) => {
@@ -34,7 +40,7 @@ const fetchValidPerson = async (url: URL) => {
       accept: "application/activity+json",
     },
   });
-  const parsed = personSchema.safeParse(response);
+  const parsed = personSchema.safeParse(response?.body);
   if (!parsed.success) {
     return null;
   }
@@ -43,7 +49,6 @@ const fetchValidPerson = async (url: URL) => {
 
 const findOrFetchUser = async (name: string, host?: string) => {
   // hostが無いかenv.HOSTと一致するなら自サーバーのユーザー
-  console.log(host, env.HOST);
   if (host == undefined || host == env.HOST) {
     return prisma.user.findFirst({ where: { name } });
   }
