@@ -45,8 +45,10 @@ export const fetchJson = async <T extends object>(
   } catch (e) {
     if (e instanceof got.HTTPError) {
       logger.warn(`${e.code}: ${url}`);
+      return null;
     }
-    return null;
+    // nockのエラーを想定
+    throw e;
   }
 };
 
