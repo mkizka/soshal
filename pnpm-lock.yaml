@@ -32,7 +32,6 @@ specifiers:
   superjson: 1.9.1
   ts-node: ^10.9.1
   typescript: ^4.9.4
-  whatwg-fetch: ^3.6.2
   zod: ^3.20.2
 
 dependencies:
@@ -70,7 +69,6 @@ devDependencies:
   prisma: 4.8.0
   ts-node: 10.9.1_awa2wsr5thmg3i7jqycphctjfq
   typescript: 4.9.4
-  whatwg-fetch: 3.6.2
 
 packages:
 
@@ -4764,10 +4762,6 @@ packages:
     resolution: {integrity: sha512-ts/8E8l5b7kY0vlWLewOkDXMmPdLcVV4GmOQLyxuSswIJsweeFZtAsMF7k1Nszz+TYBQrlYRmzOnr398y1JemQ==}
     dependencies:
       makeerror: 1.0.12
-    dev: true
-
-  /whatwg-fetch/3.6.2:
-    resolution: {integrity: sha512-bJlen0FcuU/0EMLrdbJ7zOnW6ITZLrZMIarMUVmdKtsGvZna8vxKYaexICWPfZ8qwf9fzNq+UEIZrnSaApt6RA==}
     dev: true
 
   /which-boxed-primitive/1.0.2:

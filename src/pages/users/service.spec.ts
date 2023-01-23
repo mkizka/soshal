@@ -15,6 +15,7 @@ const dummyUser: User = {
 
 jest.mock("../../env/server", () => ({
   env: {
+    ...process.env,
     HOST: "myhost.example.com",
   },
 }));
