@@ -1,9 +1,16 @@
-import pino from "pino";
+import { createLogger, format, transports } from "winston";
 import { env } from "../env/server.mjs";
 
-export const logger = pino({
-  enabled: env.NODE_ENV != "test",
-  transport: {
-    target: "pino-pretty",
-  },
+export const logger = createLogger({
+  format: format.combine(
+    format.timestamp(),
+    format.printf(
+      (log) => `${log.timestamp} - [${log.level.toUpperCase()}] ${log.message}` // 出力内容をカスタマイズする
+    )
+  ),
+  transports: [
+    new transports.Console({
+      silent: env.NODE_ENV == "test",
+    }),
+  ],
 });
