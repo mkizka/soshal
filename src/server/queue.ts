@@ -1,4 +1,5 @@
 import { env } from "../env/server.mjs";
+import { globalize } from "../utils/globalize";
 import { logger } from "../utils/logger";
 
 type QueueItem = object;
@@ -10,6 +11,7 @@ class Queue {
 
   constructor() {
     logger.info("Queueが初期化されました");
+    this.startBackground();
   }
 
   public push(item: QueueItem) {
@@ -52,21 +54,4 @@ class Queue {
   }
 }
 
-// prisma のベストプラクティスを参考
-declare global {
-  // eslint-disable-next-line no-var
-  var _queue: Queue | undefined;
-}
-
-export const queue = (() => {
-  if (global._queue) {
-    return global._queue;
-  }
-  const newQueue = new Queue();
-  newQueue.startBackground();
-  return newQueue;
-})();
-
-if (env.NODE_ENV !== "production") {
-  global._queue = queue;
-}
+export const queue = globalize("queue", () => new Queue());
