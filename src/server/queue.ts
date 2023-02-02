@@ -2,7 +2,7 @@ import { env } from "../env/server.mjs";
 import { globalize } from "../utils/globalize";
 import { logger } from "../utils/logger";
 
-type QueueItem = object;
+type QueueItem = () => void | Promise<void>;
 
 class Queue {
   private isActive = true;
@@ -30,18 +30,13 @@ class Queue {
   private runBackground() {
     try {
       const item = this.queue.shift();
-      if (item) this.doTask(item);
+      if (item) item();
     } catch (e) {
       logger.error(`queue.runBackground: ${e}`);
     }
     setTimeout(() => {
       if (this.isActive) this.runBackground();
     }, 100);
-  }
-
-  private doTask(item: QueueItem) {
-    logger.info(`doTask: ${JSON.stringify(item)}`);
-    // TODO: タスクの処理を書く
   }
 
   public stopBackground() {

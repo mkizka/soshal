@@ -15,6 +15,7 @@ specifiers:
   '@typescript-eslint/eslint-plugin': ^5.47.1
   '@typescript-eslint/parser': ^5.47.1
   activitypub-core-types: ^0.1.1
+  activitypub-http-signatures: ^2.0.1
   eslint: ^8.30.0
   eslint-config-next: 13.1.1
   got: ^11.8.6
@@ -41,6 +42,7 @@ dependencies:
   '@trpc/next': 10.7.0_feu6xodxtgd2hktgc23del3mna
   '@trpc/react-query': 10.7.0_voi52uzzn4btzulk52fuvwecw4
   '@trpc/server': 10.7.0
+  activitypub-http-signatures: 2.0.1
   got: 11.8.6
   next: 13.1.1_biqbaboplfbrettd7655fr4n2y
   next-auth: 4.18.7_mibeyvivfhhmvvbkd4wwrgzcom
@@ -1365,6 +1367,11 @@ packages:
   /activitypub-core-types/0.1.1:
     resolution: {integrity: sha512-agiH5qmid7El0I119wM2oHWYTBIAqolEp+W4axkvbIY0KBqGyOum0r1ftUh8cB+MHhoQ3K20pNrUvqChuzvaVg==}
     dev: true
+
+  /activitypub-http-signatures/2.0.1:
+    resolution: {integrity: sha512-Yiko/1xGQVUzFkrx90nuRrJUPZm2uzqaU6os2PkOXLPv122xGBvESz1z2H2zxdyMCfqCuOp9dQzrAatMmCeCHg==}
+    engines: {node: ^16.8.0}
+    dev: false
 
   /ajv/6.12.6:
     resolution: {integrity: sha512-j3fVLgvTo527anyYyJOGTYJbG+vnnQYvE0m5mmkc1TK+nxAppkCLMIL0aZ4dblVCNoGShhm+kzE4ZUykBoMg4g==}
