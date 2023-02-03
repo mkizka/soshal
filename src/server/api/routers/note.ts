@@ -87,7 +87,7 @@ function getSignedHeaders(
     Date: date,
     Digest: `SHA-256=${s256}`,
     Signature:
-      `keyId=${publicKeyId},` +
+      `keyId="${publicKeyId}",` +
       `algorithm="rsa-sha256",` +
       `headers="(request-target) host date digest",` +
       `signature="${b64}"`,
