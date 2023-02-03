@@ -34,7 +34,17 @@ export const noteRouter = createTRPCRouter({
         const inboxUrl = new URL(
           "https://misskey.paas.mkizka.dev/users/97sz5gh3ut/inbox"
         );
-        const data = activityStreams.note(note);
+        const apNote = activityStreams.note(note);
+        const data = {
+          "@context": "https://www.w3.org/ns/activitystreams",
+          id: `${apNote.id}/activity`,
+          type: "Create",
+          actor: apNote.attributedTo,
+          published: apNote.published,
+          to: apNote.to,
+          cc: apNote.cc,
+          object: apNote,
+        };
         const headers = getSignedHeaders(
           data,
           `https://${env.HOST}/@${user.name}#main-key`,
