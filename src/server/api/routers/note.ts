@@ -1,6 +1,5 @@
 import { z } from "zod";
-// @ts-ignore
-import { Sha256Signer } from "activitypub-http-signatures";
+import crypto from "crypto";
 import got from "got";
 
 import { prisma } from "../../db";
@@ -8,12 +7,13 @@ import { queue } from "../../queue";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { logger } from "../../../utils/logger";
 import { env } from "../../../env/server.mjs";
+import { activityStreams } from "../../../utils/activitypub";
 
 export const noteRouter = createTRPCRouter({
   create: protectedProcedure
     .input(z.object({ text: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      await prisma.note.create({
+      const note = await prisma.note.create({
         data: {
           userId: ctx.session.user.id,
           content: input.text,
@@ -31,35 +31,59 @@ export const noteRouter = createTRPCRouter({
           throw new Error();
         }
         // TODO: 連合先の各サーバーに送信するようにする
-        const url = "https://misskey.paas.mkizka.dev/users/97sz5gh3ut/inbox";
-        // TODO: 以下を関数化
-        const headers = {
-          host: new URL(url).host,
-          date: new Date().toUTCString(),
-        };
-        const signer = new Sha256Signer({
-          publicKeyId: `https://${env.HOST}/@${user.name}#main-key`,
-          privateKey: user?.privateKey,
-        });
-
-        const signature = signer.sign({
-          url,
+        const inboxUrl = new URL(
+          "https://misskey.paas.mkizka.dev/users/97sz5gh3ut/inbox"
+        );
+        const data = activityStreams.note(note);
+        const headers = getSignedHeaders(
+          data,
+          `https://${env.HOST}/@${user.name}#main-key`,
+          user.privateKey,
+          inboxUrl
+        );
+        const response = await got(inboxUrl, {
           method: "POST",
+          json: data,
           headers,
         });
-        const response = await got(url, {
-          method: "POST",
-          headers: {
-            ...headers,
-            signature,
-            accept: "application/ld+json",
-          },
-        });
-        logger.info(`POST:${url}`);
-        logger.info(`RES :${response.body.slice(0, 20)}`);
+        logger.info({ inboxUrl, response });
       });
-      return {
-        greeting: `Hello ${input.text}`,
-      };
     }),
 });
+
+function getSignedHeaders(
+  data: object,
+  publicKeyId: string,
+  privateKey: string,
+  inboxUrl: URL
+) {
+  const date = new Date().toUTCString();
+  const s256 = crypto
+    .createHash("sha256")
+    .update(JSON.stringify(data))
+    .digest("base64");
+  const sig = crypto
+    .createSign("sha256")
+    .update(
+      `(request-target): post ${inboxUrl.pathname}\n` +
+        `host: ${inboxUrl.host}\n` +
+        `date: ${date}\n` +
+        `digest: SHA-256=${s256}`
+    )
+    .end();
+  const b64 = sig.sign(privateKey, "base64");
+  const headers = {
+    Host: inboxUrl.host,
+    Date: date,
+    Digest: `SHA-256=${s256}`,
+    Signature:
+      `keyId=${publicKeyId},` +
+      `algorithm="rsa-sha256",` +
+      `headers="(request-target) host date digest",` +
+      `signature="${b64}"`,
+    Accept: "application/activity+json",
+    "Content-Type": "application/activity+json",
+    "Accept-Encoding": "gzip",
+  };
+  return headers;
+}
