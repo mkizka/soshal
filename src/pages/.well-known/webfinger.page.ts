@@ -2,7 +2,8 @@ import { GetServerSideProps } from "next";
 import { env } from "../../env/server.mjs";
 import { prisma } from "../../server/db";
 
-export default () => {};
+const Noop = () => undefined;
+export default Noop;
 
 export const getServerSideProps: GetServerSideProps = async ({
   res,
