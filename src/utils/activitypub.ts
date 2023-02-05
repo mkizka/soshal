@@ -59,7 +59,7 @@ const convertCreate = (note: Note): AP.Create => {
   return {
     "@context": "https://www.w3.org/ns/activitystreams",
     type: "Create",
-    actor: new URL(`https://${env.HOST}/notes/${note.id}`),
+    actor: new URL(`https://${env.HOST}/users/${note.userId}`),
     object: convertNote(note),
   };
 };
