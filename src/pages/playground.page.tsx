@@ -50,7 +50,7 @@ const AddNote = () => {
       context.example.invalidate();
     },
   });
-  const deleteMutation = api.example.deleteNote.useMutation({
+  const deleteMutation = api.note.delete.useMutation({
     onSuccess() {
       context.example.invalidate();
     },
