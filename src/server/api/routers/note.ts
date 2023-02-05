@@ -4,7 +4,7 @@ import { env } from "../../../env/server.mjs";
 import { activityStreams } from "../../../utils/activitypub";
 import { logger } from "../../../utils/logger";
 import { prisma } from "../../db";
-import { queue } from "../../queue";
+import { queue } from "../../background/queue";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const noteRouter = createTRPCRouter({
@@ -18,7 +18,7 @@ export const noteRouter = createTRPCRouter({
         },
       });
       const user = await prisma.user.findFirst({
-        select: { privateKey: true },
+        select: { id: true, privateKey: true },
         where: { id: ctx.session.user.id },
       });
       if (!user || !user.privateKey) {
@@ -27,29 +27,21 @@ export const noteRouter = createTRPCRouter({
         );
         return;
       }
-      const apNote = activityStreams.note(note);
-      const data = {
-        "@context": "https://www.w3.org/ns/activitystreams",
-        id: new URL(`${apNote.id}/activity`),
-        type: "Create",
-        actor: apNote.attributedTo!,
-        published: apNote.published,
-        to: apNote.to,
-        cc: apNote.cc,
-        object: apNote,
-      } as const;
-      queue.pushRelayActivity(
-        data,
-        data.actor.toString() + "#main-key",
-        user.privateKey
-      );
+      queue.push({
+        runner: "relayActivity",
+        params: {
+          activity: activityStreams.create(note),
+          publicKeyId: `https://${env.HOST}/users/${user.id}#main-key`,
+          privateKey: user.privateKey,
+        },
+      });
     }),
   delete: protectedProcedure
     .input(z.string())
     .mutation(async ({ input: noteId, ctx }) => {
       await prisma.note.delete({ where: { id: noteId } });
       const user = await prisma.user.findFirst({
-        select: { privateKey: true },
+        select: { id: true, privateKey: true },
         where: { id: ctx.session.user.id },
       });
       if (!user || !user.privateKey) {
@@ -58,16 +50,13 @@ export const noteRouter = createTRPCRouter({
         );
         return;
       }
-      const data = {
-        "@context": "https://www.w3.org/ns/activitystreams",
-        type: "Delete",
-        actor: new URL(`https://${env.HOST}/users/${ctx.session.user.id}`),
-        object: new URL(`https://${env.HOST}/notes/${noteId}`),
-      } as const;
-      queue.pushRelayActivity(
-        data,
-        data.actor.toString() + "#main-key",
-        user.privateKey
-      );
+      queue.push({
+        runner: "relayActivity",
+        params: {
+          activity: activityStreams.delete({ id: noteId, userId: user.id }),
+          publicKeyId: `https://${env.HOST}/users/${user.id}#main-key`,
+          privateKey: user.privateKey,
+        },
+      });
     }),
 });

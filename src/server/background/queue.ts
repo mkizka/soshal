@@ -1,11 +1,18 @@
-import got from "got";
-import type { AP } from "activitypub-core-types";
-import { env } from "../env/server.mjs";
-import { globalize } from "../utils/globalize";
-import { signHeaders } from "../utils/httpSignature";
-import { logger } from "../utils/logger";
+import { env } from "../../env/server.mjs";
+import { globalize } from "../../utils/globalize";
+import { logger } from "../../utils/logger";
+import { relayActivity } from "./runners/relay";
 
-type QueueItem = () => void | Promise<void>;
+const runners = {
+  relayActivity,
+};
+
+type Runner = typeof runners;
+
+type QueueItem<RunnerType extends keyof Runner = keyof Runner> = {
+  runner: RunnerType;
+  params: Parameters<Runner[RunnerType]>[0];
+};
 
 class Queue {
   private isActive = true;
@@ -17,26 +24,8 @@ class Queue {
     this.startBackground();
   }
 
-  public push(item: QueueItem) {
+  public push<T extends keyof Runner>(item: QueueItem<T>) {
     this.queue.push(item);
-  }
-
-  public async pushRelayActivity(
-    data: AP.Activity,
-    publicKeyId: string,
-    privateKey: string
-  ) {
-    this.push(async () => {
-      // TODO: 連合先の各サーバーに送信するようにする
-      const inboxUrl = new URL("https://misskey.paas.mkizka.dev/inbox");
-      const headers = signHeaders(data, inboxUrl, publicKeyId, privateKey);
-      const response = await got(inboxUrl, {
-        method: "POST",
-        json: data,
-        headers,
-      });
-      //logger.info(`${inboxUrl}: ${response.body}`);
-    });
   }
 
   public startBackground() {
@@ -51,7 +40,7 @@ class Queue {
   private runBackground() {
     try {
       const item = this.queue.shift();
-      if (item) item();
+      if (item) runners[item.runner](item.params);
     } catch (e) {
       logger.error(`queue.runBackground: ${e}`);
     }

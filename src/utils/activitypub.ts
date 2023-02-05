@@ -7,11 +7,11 @@ const required = <T>(value: T | null | undefined) => {
   return value;
 };
 
-type CustomPerson = AP.Person & {
+const convertUser = (
+  user: User
+): AP.Person & {
   featured?: AP.OrderedCollectionReference;
-};
-
-const convertUser = (user: User): CustomPerson => {
+} => {
   const userAddress = `https://${env.HOST}/users/${user.id}`;
   return {
     "@context": [
@@ -55,17 +55,27 @@ const convertNote = (note: Note): AP.Note => {
   };
 };
 
-const convertCreate = (apNote: AP.Note): AP.Create => {
+const convertCreate = (note: Note): AP.Create => {
   return {
-    // TODO: wip
+    "@context": "https://www.w3.org/ns/activitystreams",
     type: "Create",
-    id: new URL(`${apNote.id}/activity`),
-    actor: required(apNote.attributedTo),
-    object: apNote,
+    actor: new URL(`https://${env.HOST}/notes/${note.id}`),
+    object: convertNote(note),
+  };
+};
+
+const convertDelete = (note: Pick<Note, "id" | "userId">): AP.Delete => {
+  return {
+    "@context": "https://www.w3.org/ns/activitystreams",
+    type: "Delete",
+    actor: new URL(`https://${env.HOST}/users/${note.userId}`),
+    object: new URL(`https://${env.HOST}/notes/${note.id}`),
   };
 };
 
 export const activityStreams = {
   user: convertUser,
   note: convertNote,
+  create: convertCreate,
+  delete: convertDelete,
 };
