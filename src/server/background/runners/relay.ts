@@ -1,6 +1,6 @@
 import type { AP } from "activitypub-core-types";
 import got from "got";
-import { signHeaders } from "../../../utils/httpSignature";
+import { signActivity } from "../../../utils/httpSignature";
 import { logger } from "../../../utils/logger";
 
 export const relayActivity = async (params: {
@@ -10,7 +10,7 @@ export const relayActivity = async (params: {
 }) => {
   // TODO: 連合先の各サーバーに送信するようにする
   const inboxUrl = new URL("https://misskey.paas.mkizka.dev/inbox");
-  const headers = signHeaders(
+  const headers = signActivity(
     params.activity,
     inboxUrl,
     params.publicKeyId,
