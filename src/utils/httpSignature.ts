@@ -49,11 +49,8 @@ export const signActivity = (
     Signature:
       `keyId="${publicKeyId}",` +
       `algorithm="rsa-sha256",` +
-      `headers="",` +
+      `headers="(request-target) host date digest",` +
       `signature="${signature}"`,
-    Accept: "application/activity+json",
-    "Content-Type": "application/activity+json",
-    "Accept-Encoding": "gzip",
   };
 };
 

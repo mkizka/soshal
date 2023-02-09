@@ -10,7 +10,7 @@ export const relayActivity = async (params: {
 }) => {
   // TODO: 連合先の各サーバーに送信するようにする
   const inboxUrl = new URL("https://misskey.paas.mkizka.dev/inbox");
-  const headers = signActivity(
+  const signedHeaders = signActivity(
     params.activity,
     inboxUrl,
     params.publicKeyId,
@@ -19,7 +19,10 @@ export const relayActivity = async (params: {
   const response = await got(inboxUrl, {
     method: "POST",
     json: params.activity,
-    headers,
+    headers: {
+      Accept: "application/activity+json",
+      ...signedHeaders,
+    },
   });
   logger.info(`${inboxUrl}: ${response.body}`);
 };

@@ -1,7 +1,4 @@
 export const expectedHeader = {
-  Accept: "application/activity+json",
-  "Accept-Encoding": "gzip",
-  "Content-Type": "application/activity+json",
   Date: "Sun, 01 Jan 2023 00:00:00 GMT",
   Digest: "SHA-256=RBNvo1WzZ4oRRq0W9+hknpT7T8If536DEMBg9hyq/4o=",
   Host: "remote.example.com",
@@ -13,9 +10,6 @@ export const expectedHeader = {
 };
 
 export const invalidHeadersSortHeader = {
-  Accept: "application/activity+json",
-  "Accept-Encoding": "gzip",
-  "Content-Type": "application/activity+json",
   Date: "Sun, 01 Jan 2023 00:00:00 GMT",
   Digest: "SHA-256=RBNvo1WzZ4oRRq0W9+hknpT7T8If536DEMBg9hyq/4o=",
   Host: "remote.example.com",
