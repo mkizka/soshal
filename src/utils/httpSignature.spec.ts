@@ -1,6 +1,7 @@
 import type { AP } from "activitypub-core-types";
 import { signActivity, verifyActivity } from "./httpSignature";
-import { expectedHeader, mockedKeys } from "./__mocks__/mockedKeys";
+import { mockedKeys } from "./fixtures/keys";
+import { expectedHeader, invalidHeadersSortHeader } from "./fixtures/headers";
 
 beforeAll(() => {
   jest.useFakeTimers().setSystemTime(new Date("2023-01-01"));
@@ -26,15 +27,19 @@ describe("signActivity", () => {
 });
 
 describe("verifyActivity", () => {
-  test("署名されたヘッダーを検証する", () => {
+  test.each`
+    header                      | expected | description
+    ${expectedHeader}           | ${true}  | ${"署名されたActivityを検証する"}
+    ${invalidHeadersSortHeader} | ${false} | ${"headersの順序が異なればsignatureも異なる"}
+  `("$description", ({ header, expected }) => {
     // act
     const actual = verifyActivity(
       {} as AP.Create,
       new URL("https://remote.example.com/inbox"),
-      expectedHeader.Signature,
+      header,
       mockedKeys.publickKey
     );
     // assert
-    expect(actual).toBe(true);
+    expect(actual).toBe(expected);
   });
 });

@@ -1,5 +1,6 @@
 import type { AP } from "activitypub-core-types";
 import crypto from "crypto";
+import { z } from "zod";
 
 const getHeaderToSign = (url: URL, activity: AP.Activity) => {
   const date = new Date().toUTCString();
@@ -15,9 +16,14 @@ const getHeaderToSign = (url: URL, activity: AP.Activity) => {
   };
 };
 
-const textOf = (header: ReturnType<typeof getHeaderToSign>) => {
-  return Object.entries(header)
-    .map(([k, v]) => `${k}: ${v}`)
+type HeaderToSign = ReturnType<typeof getHeaderToSign>;
+
+const textOf = (header: HeaderToSign, order?: string[]) => {
+  // 署名する時は getHeaderToSign のキー順で文字列を作る
+  // 検証する時は order(リクエストヘッダーのSignatureをパースして取得したheadersの値) の順で文字列を作る
+  return (order || Object.keys(header))
+    .filter((key): key is keyof HeaderToSign => key in header)
+    .map((key) => `${key}: ${header[key]}`)
     .join("\n");
 };
 
@@ -43,7 +49,7 @@ export const signActivity = (
     Signature:
       `keyId="${publicKeyId}",` +
       `algorithm="rsa-sha256",` +
-      `headers="(request-target) host date digest",` +
+      `headers="",` +
       `signature="${signature}"`,
     Accept: "application/activity+json",
     "Content-Type": "application/activity+json",
@@ -51,14 +57,26 @@ export const signActivity = (
   };
 };
 
+const signatureSchema = z.object({
+  keyId: z.string(),
+  algorithm: z.string(),
+  headers: z.string(),
+  signature: z.string(),
+});
+
 const parse = (signature: string) => {
+  const result: { [key: string]: string } = {};
   for (const column of signature.split(",")) {
     const [k, ..._v] = column.split("=");
     // signature="..." の ... は base64 形式で = が含まれる可能性があるため元に戻す
     const v = _v.join("=");
-    if (k && k == "signature" && v && v.startsWith('"') && v.endsWith('"')) {
-      return v.slice(1, v.length - 1);
+    if (k && v && v.startsWith('"') && v.endsWith('"')) {
+      result[k] = v.slice(1, v.length - 1);
     }
+  }
+  const parsedSignature = signatureSchema.safeParse(result);
+  if (parsedSignature.success) {
+    return parsedSignature.data;
   }
   return null;
 };
@@ -66,16 +84,16 @@ const parse = (signature: string) => {
 export const verifyActivity = (
   data: AP.Activity,
   inboxUrl: URL,
-  signature: string,
+  header: ReturnType<typeof signActivity>,
   publicKey: string
 ) => {
-  const header = getHeaderToSign(inboxUrl, data);
-  const verify = crypto.createVerify("sha256");
-  verify.write(textOf(header));
-  verify.end();
-  const parsedSignature = parse(signature);
+  const parsedSignature = parse(header.Signature);
   if (!parsedSignature) {
     return false;
   }
-  return verify.verify(publicKey, parsedSignature, "base64");
+  const headerToSign = getHeaderToSign(inboxUrl, data);
+  const verify = crypto.createVerify("sha256");
+  verify.write(textOf(headerToSign, parsedSignature.headers.split(" ")));
+  verify.end();
+  return verify.verify(publicKey, parsedSignature.signature, "base64");
 };
