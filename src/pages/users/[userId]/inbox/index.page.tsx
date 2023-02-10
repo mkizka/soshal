@@ -4,8 +4,8 @@ const Noop = () => undefined;
 export default Noop;
 
 export const getServerSideProps = handle({
-  async post({ req }) {
-    console.log(req.body);
+  async post({ req: { headers, body } }) {
+    console.log({ headers, body });
     return notFound();
   },
 });
