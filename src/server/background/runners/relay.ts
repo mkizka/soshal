@@ -1,6 +1,6 @@
 import type { AP } from "activitypub-core-types";
 import got from "got";
-import { signActivity } from "../../../utils/httpSignature";
+import { signActivity } from "../../../utils/httpSignature/sign";
 import { logger } from "../../../utils/logger";
 
 export const relayActivity = async (params: {

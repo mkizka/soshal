@@ -1,56 +1,6 @@
-import type { AP } from "activitypub-core-types";
 import crypto from "crypto";
 import { z } from "zod";
-
-const createDigest = (activity: object) => {
-  return crypto
-    .createHash("sha256")
-    .update(JSON.stringify(activity))
-    .digest("base64");
-};
-
-const textOf = (header: { [key: string]: string }, order: string[]) => {
-  // 検証する時は order(リクエストヘッダーのSignatureをパースして取得したheadersの値) の順で文字列を作る
-  return order
-    .filter((key) => key in header)
-    .map((key) => `${key}: ${header[key]}`)
-    .join("\n");
-};
-
-const getSignature = (textToSign: string, privateKey: string) => {
-  const sig = crypto.createSign("sha256").update(textToSign).end();
-  return sig.sign(privateKey, "base64");
-};
-
-// TODO: 理解する
-// https://docs.joinmastodon.org/spec/security/
-export const signActivity = (
-  activity: AP.Activity,
-  inboxUrl: URL,
-  publicKeyId: string,
-  privateKey: string
-) => {
-  const order = ["(request-target)", "host", "date", "digest"];
-  const header = {
-    host: inboxUrl.host,
-    date: new Date().toUTCString(),
-    digest: `SHA-256=${createDigest(activity)}`,
-  };
-  const headerToSign = {
-    "(request-target)": `post ${inboxUrl.pathname}`,
-    ...header,
-  };
-  const textToSign = textOf(headerToSign, order);
-  const signature = getSignature(textToSign, privateKey);
-  return {
-    ...header,
-    signature:
-      `keyId="${publicKeyId}",` +
-      `algorithm="rsa-sha256",` +
-      `headers="${order.join(" ")}",` +
-      `signature="${signature}"`,
-  };
-};
+import { textOf } from "./utils";
 
 const signatureSchema = z.object({
   keyId: z.string().url(),
