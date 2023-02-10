@@ -20,6 +20,7 @@ afterAll(() => {
 describe("signActivity", () => {
   test.each`
     url                                                      | date            | activity              | description
+    ${new URL("https://remote.example.com/inbox")}           | ${"2023-01-01"} | ${{}}                 | ${"default"}
     ${new URL("https://remote1.example.com/inbox")}          | ${"2023-01-01"} | ${{}}                 | ${"url"}
     ${new URL("https://remote.example.com/users/foo/inbox")} | ${"2023-01-01"} | ${{}}                 | ${"path"}
     ${new URL("https://remote.example.com/inbox")}           | ${"2023-01-02"} | ${{}}                 | ${"date"}
@@ -54,11 +55,7 @@ describe("verifyActivity", () => {
     ${unSupportedAlgorithmHeader} | ${false}        | ${"unsupportedはサポートしていないアルゴリズムです"} | ${"アルゴリズムがrsa-sha256でない"}
   `("$description", ({ header, expectedIsValid, expectedReason }) => {
     // act
-    const actual = verifyActivity(
-      new URL("https://remote.example.com/inbox"),
-      header,
-      mockedKeys.publickKey
-    );
+    const actual = verifyActivity("post /inbox", header, mockedKeys.publickKey);
     // assert
     expect(actual).toEqual({
       isValid: expectedIsValid,

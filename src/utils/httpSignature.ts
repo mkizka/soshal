@@ -9,28 +9,10 @@ const createDigest = (activity: object) => {
     .digest("base64");
 };
 
-const createHeaderToSign = (url: URL, activity: AP.Activity) => {
-  return {
-    "(request-target)": `post ${url.pathname}`,
-    host: url.host,
-    date: new Date().toUTCString(),
-    digest: `SHA-256=${createDigest(activity)}`,
-  };
-};
-
-type HeaderToSign = ReturnType<typeof createHeaderToSign>;
-
-const ORDER_OF_HEADER_TO_SIGN: (keyof HeaderToSign)[] = [
-  "(request-target)",
-  "host",
-  "date",
-  "digest",
-];
-
-const textOf = (header: HeaderToSign, order?: string[]) => {
+const textOf = (header: { [key: string]: string }, order: string[]) => {
   // 検証する時は order(リクエストヘッダーのSignatureをパースして取得したheadersの値) の順で文字列を作る
-  return (order || ORDER_OF_HEADER_TO_SIGN)
-    .filter((key): key is keyof HeaderToSign => key in header)
+  return order
+    .filter((key) => key in header)
     .map((key) => `${key}: ${header[key]}`)
     .join("\n");
 };
@@ -43,21 +25,29 @@ const getSignature = (textToSign: string, privateKey: string) => {
 // TODO: 理解する
 // https://docs.joinmastodon.org/spec/security/
 export const signActivity = (
-  data: AP.Activity,
+  activity: AP.Activity,
   inboxUrl: URL,
   publicKeyId: string,
   privateKey: string
 ) => {
-  const headerToSign = createHeaderToSign(inboxUrl, data);
-  const signature = getSignature(textOf(headerToSign), privateKey);
+  const order = ["(request-target)", "host", "date", "digest"];
+  const header = {
+    host: inboxUrl.host,
+    date: new Date().toUTCString(),
+    digest: `SHA-256=${createDigest(activity)}`,
+  };
+  const headerToSign = {
+    "(request-target)": `post ${inboxUrl.pathname}`,
+    ...header,
+  };
+  const textToSign = textOf(headerToSign, order);
+  const signature = getSignature(textToSign, privateKey);
   return {
-    Host: headerToSign.host,
-    Date: headerToSign.date,
-    Digest: headerToSign.digest,
-    Signature:
+    ...header,
+    signature:
       `keyId="${publicKeyId}",` +
       `algorithm="rsa-sha256",` +
-      `headers="${ORDER_OF_HEADER_TO_SIGN.join(" ")}",` +
+      `headers="${order.join(" ")}",` +
       `signature="${signature}"`,
   };
 };
@@ -103,11 +93,17 @@ type VerifyResult =
     };
 
 export const verifyActivity = (
-  inboxUrl: URL,
+  requestTarget: string,
   header: { [key: string]: string },
   publicKey: string
 ): VerifyResult => {
-  const parsedSignature = parse(header.Signature);
+  if (!header.signature) {
+    return {
+      isValid: false,
+      reason: "Signatureヘッダーがありませんでした",
+    };
+  }
+  const parsedSignature = parse(header.signature);
   if (!parsedSignature) {
     return {
       isValid: false,
@@ -121,12 +117,11 @@ export const verifyActivity = (
     };
   }
   const headerToSign = {
-    "(request-target)": `post ${inboxUrl.pathname}`,
-    host: header.Host,
-    date: header.Date,
-    digest: header.Digest,
+    "(request-target)": requestTarget,
+    ...header,
   };
-  const textToSign = textOf(headerToSign, parsedSignature.headers.split(" "));
+  const order = parsedSignature.headers.split(" ");
+  const textToSign = textOf(headerToSign, order);
   const isValid = createVerify(textToSign).verify(
     publicKey,
     parsedSignature.signature,
