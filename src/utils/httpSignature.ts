@@ -2,26 +2,34 @@ import type { AP } from "activitypub-core-types";
 import crypto from "crypto";
 import { z } from "zod";
 
-const getHeaderToSign = (url: URL, activity: AP.Activity) => {
-  const date = new Date().toUTCString();
-  const s256 = crypto
+const createDigest = (activity: object) => {
+  return crypto
     .createHash("sha256")
     .update(JSON.stringify(activity))
     .digest("base64");
+};
+
+const createHeaderToSign = (url: URL, activity: AP.Activity) => {
   return {
     "(request-target)": `post ${url.pathname}`,
     host: url.host,
-    date: date,
-    digest: `SHA-256=${s256}`,
+    date: new Date().toUTCString(),
+    digest: `SHA-256=${createDigest(activity)}`,
   };
 };
 
-type HeaderToSign = ReturnType<typeof getHeaderToSign>;
+type HeaderToSign = ReturnType<typeof createHeaderToSign>;
+
+const ORDER_OF_HEADER_TO_SIGN: (keyof HeaderToSign)[] = [
+  "(request-target)",
+  "host",
+  "date",
+  "digest",
+];
 
 const textOf = (header: HeaderToSign, order?: string[]) => {
-  // 署名する時は getHeaderToSign のキー順で文字列を作る
   // 検証する時は order(リクエストヘッダーのSignatureをパースして取得したheadersの値) の順で文字列を作る
-  return (order || Object.keys(header))
+  return (order || ORDER_OF_HEADER_TO_SIGN)
     .filter((key): key is keyof HeaderToSign => key in header)
     .map((key) => `${key}: ${header[key]}`)
     .join("\n");
@@ -40,7 +48,7 @@ export const signActivity = (
   publicKeyId: string,
   privateKey: string
 ) => {
-  const headerToSign = getHeaderToSign(inboxUrl, data);
+  const headerToSign = createHeaderToSign(inboxUrl, data);
   const signature = getSignature(textOf(headerToSign), privateKey);
   return {
     Host: headerToSign.host,
@@ -49,7 +57,7 @@ export const signActivity = (
     Signature:
       `keyId="${publicKeyId}",` +
       `algorithm="rsa-sha256",` +
-      `headers="(request-target) host date digest",` +
+      `headers="${ORDER_OF_HEADER_TO_SIGN.join(" ")}",` +
       `signature="${signature}"`,
   };
 };
@@ -78,8 +86,14 @@ const parse = (signature: string) => {
   return null;
 };
 
+const createVerify = (textToSign: string) => {
+  const verify = crypto.createVerify("sha256");
+  verify.write(textToSign);
+  verify.end();
+  return verify;
+};
+
 export const verifyActivity = (
-  data: AP.Activity,
   inboxUrl: URL,
   header: ReturnType<typeof signActivity>,
   publicKey: string
@@ -88,9 +102,16 @@ export const verifyActivity = (
   if (!parsedSignature) {
     return false;
   }
-  const headerToSign = getHeaderToSign(inboxUrl, data);
-  const verify = crypto.createVerify("sha256");
-  verify.write(textOf(headerToSign, parsedSignature.headers.split(" ")));
-  verify.end();
-  return verify.verify(publicKey, parsedSignature.signature, "base64");
+  const headerToSign = {
+    "(request-target)": `post ${inboxUrl.pathname}`,
+    host: header.Host,
+    date: header.Date,
+    digest: header.Digest,
+  };
+  const textToSign = textOf(headerToSign, parsedSignature.headers.split(" "));
+  return createVerify(textToSign).verify(
+    publicKey,
+    parsedSignature.signature,
+    "base64"
+  );
 };
