@@ -63,7 +63,7 @@ export const signActivity = (
 };
 
 const signatureSchema = z.object({
-  keyId: z.string(),
+  keyId: z.string().url(),
   algorithm: z.string(),
   headers: z.string(),
   signature: z.string(),
@@ -93,14 +93,32 @@ const createVerify = (textToSign: string) => {
   return verify;
 };
 
+type VerifyResult =
+  | {
+      isValid: true;
+    }
+  | {
+      isValid: false;
+      reason: string;
+    };
+
 export const verifyActivity = (
   inboxUrl: URL,
-  header: ReturnType<typeof signActivity>,
+  header: { [key: string]: string },
   publicKey: string
-) => {
+): VerifyResult => {
   const parsedSignature = parse(header.Signature);
   if (!parsedSignature) {
-    return false;
+    return {
+      isValid: false,
+      reason: `ヘッダーの型が不正でした`,
+    };
+  }
+  if (parsedSignature.algorithm != "rsa-sha256") {
+    return {
+      isValid: false,
+      reason: `${parsedSignature.algorithm}はサポートしていないアルゴリズムです`,
+    };
   }
   const headerToSign = {
     "(request-target)": `post ${inboxUrl.pathname}`,
@@ -109,9 +127,13 @@ export const verifyActivity = (
     digest: header.Digest,
   };
   const textToSign = textOf(headerToSign, parsedSignature.headers.split(" "));
-  return createVerify(textToSign).verify(
+  const isValid = createVerify(textToSign).verify(
     publicKey,
     parsedSignature.signature,
     "base64"
   );
+  if (!isValid) {
+    return { isValid, reason: "verifyの結果がfalseでした" };
+  }
+  return { isValid };
 };

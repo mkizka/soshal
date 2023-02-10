@@ -1,0 +1,37 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`signActivity 署名されたヘッダーを返す: activity 1`] = `
+{
+  "Date": "Sun, 01 Jan 2023 00:00:00 GMT",
+  "Digest": "SHA-256=JeE18werLvQnEoHViKDam+ZK1D8E27TBC2kIISI7pIY=",
+  "Host": "remote.example.com",
+  "Signature": "keyId="https://myhost.example.com/example#main-key",algorithm="rsa-sha256",headers="(request-target) host date digest",signature="i335/DHLc9AVBH8vUEyucyC6hfQGdp0iBaD01FWdyrmJYjwr3cyvmzDJPg931z6wK01T2ef6VDq/VrvvR6qfXw8/e3Sx/iGgt34eNs6OS4Oen/qjgXk4Baq4zMdzMiijCXNcS956NG1UMYMZx6h8OgYsqtleoTlaRc/RLdDLiZgLk1uI/uxdyZgrh1dgQkAASMBTxVaWA5lO5me78JOKpRSgb5V/yQQHvHbqnwCMefF0x96wZ8LZjEKq3+8c9Rb2s4F7BQMrt5NnhvEl/Jz7wuF8VRn6zudyv3DQBIGWCuJlDdG/9etcRmtjAFEiI9itcyONIr90++WBy6vrUw=="",
+}
+`;
+
+exports[`signActivity 署名されたヘッダーを返す: date 1`] = `
+{
+  "Date": "Mon, 02 Jan 2023 00:00:00 GMT",
+  "Digest": "SHA-256=RBNvo1WzZ4oRRq0W9+hknpT7T8If536DEMBg9hyq/4o=",
+  "Host": "remote.example.com",
+  "Signature": "keyId="https://myhost.example.com/example#main-key",algorithm="rsa-sha256",headers="(request-target) host date digest",signature="neklhquVUYp5K2EN08PWvQS0AScZ2rGduHOno8hSG9k8xHW33Zm3r6UeKBJ3vs+RcSSnvatfcR/cnlfGBmDO0jbNCy71vKpzl0ExDKn5psHA8Tg1CmlH9wY4n00TnjYz1tTEFW9kBUp36yliYRlFDO+H2g25lCaGszD546yISO2rAZ/B3SF/pRWcNwuPZmJ+/As1VefUmTp94jTZ8fK5xjh0c4ulQTn3OQY1ppztaM029jqd9YlQR2rQMzgFc9+0VZPWarvLpzTh5qAwaNC18SRwhph5xXQy9tss4Zwpo39o+TcVUGgzMdj+1cZ3ogM6Tb1Unt7tcpkCtsDhww=="",
+}
+`;
+
+exports[`signActivity 署名されたヘッダーを返す: path 1`] = `
+{
+  "Date": "Sun, 01 Jan 2023 00:00:00 GMT",
+  "Digest": "SHA-256=RBNvo1WzZ4oRRq0W9+hknpT7T8If536DEMBg9hyq/4o=",
+  "Host": "remote.example.com",
+  "Signature": "keyId="https://myhost.example.com/example#main-key",algorithm="rsa-sha256",headers="(request-target) host date digest",signature="cy1p2VbFR8S6RebKid90+gXdsb36LayujQI+cFIDg/blZm1eEmtPoub4d+PoyA18G1xLQ170G2txm0m1MKiM/+V3OxumwUWIpcF+eQP2vPZ9y3ZqFk12gjAmM8QEOwti72tuYT0Xtg19Ptag0N4iw62jp/3ntGSTsOvLbVkuFi53/CThiM/0XuF6Z5/C6Vthqd/5FS4TGLKNWb0KzDN8Rzrei0DbzCSYh2s5AUZhJq3Gx+JzwR1ppT1WIhqr3vSm8U6AC0DJJEQxYNwRYcWS9cPm3/oLz22tR5AMhvGV/ZRw+F+w54T1ciM4crav1xaCAP1zQ0+0Le5NB1lN0A=="",
+}
+`;
+
+exports[`signActivity 署名されたヘッダーを返す: url 1`] = `
+{
+  "Date": "Sun, 01 Jan 2023 00:00:00 GMT",
+  "Digest": "SHA-256=RBNvo1WzZ4oRRq0W9+hknpT7T8If536DEMBg9hyq/4o=",
+  "Host": "remote1.example.com",
+  "Signature": "keyId="https://myhost.example.com/example#main-key",algorithm="rsa-sha256",headers="(request-target) host date digest",signature="Z7vtxdHR8DXUYEkvf1/Z1bxxzY7HAfiSihD22r1OQWCfKA+92aUmQX0rLySd4iI3kZKckhXk1DUz09poh5KEWLZl/x4MNjLKtjL7RjmuhodkNXamxz7HacWHIyAzl9M3fv+J2cwF1SKrey1EZndzYUn3wK4gDzIkyWCZZ9Q0zMkaLpqt5lFUnho4B1nVAUwgA1poneBoJZIKL+gkjHUr8Yrn/O6sk2g6VjhUqi5oMFDmI0/BVVwlSSPFt49QdAYevqRsZTUAkjObsH+rM4gPlhEduGCjteXdrwp+DIuVMvo3NE97hZEHmHkx4Op+78fM5w8eQj6loXCPANox9w=="",
+}
+`;
