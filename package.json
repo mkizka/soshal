@@ -48,5 +48,10 @@
   },
   "ct3aMetadata": {
     "initVersion": "7.0.0"
+  },
+  "pnpm": {
+    "patchedDependencies": {
+      "next-runtime@2.4.1": "patches/next-runtime@2.4.1.patch"
+    }
   }
 }

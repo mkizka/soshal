@@ -1,0 +1,57 @@
+diff --git a/handle.js b/handle.js
+index 4a554f2e3cdf8b315dd94faef38e426ed4f37a26..a82518c3226c61f0860c4f622bd29884a7aa812e 100644
+--- a/handle.js
++++ b/handle.js
+@@ -51,6 +51,9 @@ function applyResponse(response, target, accept) {
+                 break;
+             }
+         }
++        if (accept.endsWith('+json')) {
++            target.setHeader('Content-Type', accept)
++        }
+     }
+     if ('notFound' in response.body) {
+         return { notFound: response.body.notFound };
+@@ -82,7 +85,7 @@ function handle(handlers) {
+     handlers.patch = (0, middleware_1.applyMiddlewares)(handlers.use, handlers.patch);
+     return (context) => __awaiter(this, void 0, void 0, function* () {
+         var _a;
+-        const accept = (0, accepts_1.default)(context.req).type(['html', 'json']);
++        const accept = (0, accepts_1.default)(context.req).type(['html', 'json', 'application/activity+json', 'application/jrd+json']);
+         const method = (((_a = context.req.method) === null || _a === void 0 ? void 0 : _a.toLowerCase()) || 'get');
+         // also handle complex objects in query params
+         context.query = (0, query_params_1.expandQueryParams)(context.query);
+@@ -127,6 +130,8 @@ function handle(handlers) {
+             case 'html': {
+                 return propResult;
+             }
++            case 'application/activity+json':
++            case 'application/jrd+json':
+             case 'json': {
+                 // keep write and end separated for Next12 compatibility.
+                 context.res.write(JSON.stringify('props' in propResult ? propResult.props : {}));
+diff --git a/runtime/body-parser.js b/runtime/body-parser.js
+index f0fdd066f291894672c360d461dbf58902f36fd8..6f4ab58514340dc3a5e684a984e1def7ad17981a 100644
+--- a/runtime/body-parser.js
++++ b/runtime/body-parser.js
+@@ -24,6 +24,8 @@ const picoid_1 = __importDefault(require("picoid"));
+ const set_field_1 = require("./set-field");
+ const ACCEPT = [
+     'application/json',
++    'application/activity+json',
++    'application/jrd+json',
+     'application/x-www-form-urlencoded',
+     'multipart/form-data',
+ ];
+@@ -43,9 +45,10 @@ function bodyparser(req, res, options) {
+             return null;
+         }
+         // application/json is handled by bodyParser, as busboy doesn't support it
+-        if (req.headers['content-type'].startsWith('application/json')) {
++        if (req.headers['content-type'].endsWith('json')) {
+             let lastKey;
+             const jsonParser = body_parser_1.default.json({
++                type: ['application/json', 'application/*+json'],
+                 limit: maxJsonSize,
+                 reviver: maxFieldSize
+                     ? (key, value) => {
