@@ -15,14 +15,14 @@ datasource db {
 }
 
 model Example {
-  id        String   @id @default(cuid())
+  id        String   @id @default(nanoid(8))
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 // Necessary for Next auth
 model Account {
-  id                String  @id @default(cuid())
+  id                String  @id @default(nanoid(8))
   userId            String
   type              String
   provider          String
@@ -40,7 +40,7 @@ model Account {
 }
 
 model Session {
-  id           String   @id @default(cuid())
+  id           String   @id @default(nanoid(8))
   sessionToken String   @unique
   userId       String
   expires      DateTime
@@ -48,7 +48,7 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String    @id @default(nanoid(8))
   name          String?
   email         String?   @unique
   emailVerified DateTime?
@@ -71,7 +71,7 @@ model VerificationToken {
 }
 
 model Note {
-  id        String   @id @default(cuid())
+  id        String   @id @default(nanoid(8))
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   content   String
@@ -79,7 +79,7 @@ model Note {
 }
 
 model Follow {
-  id         String   @id @default(nanoid())
+  id         String   @id @default(nanoid(8))
   followeeId String
   followee   User     @relation("followee", fields: [followeeId], references: [id], onDelete: Cascade)
   followerId String
