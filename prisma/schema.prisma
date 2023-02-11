@@ -58,6 +58,8 @@ model User {
   publicKey     String?
   privateKey    String?
   notes         Note[]
+  followee      Follow[]  @relation("followee")
+  follower      Follow[]  @relation("follower")
 }
 
 model VerificationToken {
@@ -74,4 +76,13 @@ model Note {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   content   String
   createdAt DateTime @default(now())
+}
+
+model Follow {
+  id         String   @id @default(nanoid())
+  followeeId String
+  followee   User     @relation("followee", fields: [followeeId], references: [id], onDelete: Cascade)
+  followerId String
+  follower   User     @relation("follower", fields: [followerId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
 }
