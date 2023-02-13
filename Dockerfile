@@ -3,6 +3,7 @@ WORKDIR /code
 RUN npm i -g npm pnpm
 COPY package.json pnpm-lock.yaml ./
 COPY prisma ./prisma
+COPY patches ./patches
 RUN pnpm i
 COPY . . 
 RUN mv .env.example .env &&\
