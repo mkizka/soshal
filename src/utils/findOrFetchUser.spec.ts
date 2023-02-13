@@ -1,7 +1,7 @@
 import type { User } from "@prisma/client";
 import nock from "nock";
 import { prismaMock } from "../__mocks__/db";
-import { findOrFetchUser } from "./findOrFetchUser";
+import { findOrFetchUserByWebfinger } from "./findOrFetchUser";
 
 const dummyUser: User = {
   id: "dummyId",
@@ -26,7 +26,7 @@ describe("findOrFetchUser", () => {
       // arrange
       prismaMock.user.findFirst.mockResolvedValue(dummyUser);
       // act
-      const user = await findOrFetchUser("dummy");
+      const user = await findOrFetchUserByWebfinger("dummy");
       // assert
       expect(prismaMock.user.findFirst).toHaveBeenCalledWith({
         where: { name: "dummy" },
@@ -37,7 +37,10 @@ describe("findOrFetchUser", () => {
       // arrange
       prismaMock.user.findFirst.mockResolvedValue(dummyUser);
       // act
-      const user = await findOrFetchUser("dummy", "myhost.example.com");
+      const user = await findOrFetchUserByWebfinger(
+        "dummy",
+        "myhost.example.com"
+      );
       // assert
       expect(prismaMock.user.findFirst).toHaveBeenCalledWith({
         where: { name: "dummy" },
@@ -48,7 +51,7 @@ describe("findOrFetchUser", () => {
       // arrange
       prismaMock.user.findFirst.mockResolvedValue(null);
       // act
-      const user = await findOrFetchUser("dummy");
+      const user = await findOrFetchUserByWebfinger("dummy");
       // assert
       expect(prismaMock.user.findFirst).toHaveBeenCalledWith({
         where: { name: "dummy" },
@@ -75,7 +78,10 @@ describe("findOrFetchUser", () => {
       prismaMock.user.findFirst.mockResolvedValue(null);
       prismaMock.user.create.mockResolvedValue(dummyUser);
       // act
-      const user = await findOrFetchUser("dummy", "remote.example.com");
+      const user = await findOrFetchUserByWebfinger(
+        "dummy",
+        "remote.example.com"
+      );
       // assert
       expect(prismaMock.user.create).toHaveBeenCalledWith({
         data: {
@@ -105,7 +111,10 @@ describe("findOrFetchUser", () => {
         .reply(200, { preferredUsername: "dummy" });
       prismaMock.user.findFirst.mockResolvedValue(dummyUser);
       // act
-      const user = await findOrFetchUser("dummy", "remote.example.com");
+      const user = await findOrFetchUserByWebfinger(
+        "dummy",
+        "remote.example.com"
+      );
       // assert
       expect(prismaMock.user.findFirst).toHaveBeenCalledWith({
         where: {
@@ -120,7 +129,7 @@ describe("findOrFetchUser", () => {
   describe("異常系", () => {
     test("hostが不正ならnullを返す", async () => {
       // act
-      const user = await findOrFetchUser("dummmy", "\\");
+      const user = await findOrFetchUserByWebfinger("dummmy", "\\");
       // assert
       expect(user).toEqual(null);
     });
@@ -133,7 +142,10 @@ describe("findOrFetchUser", () => {
         })
         .reply(404);
       // act
-      const user = await findOrFetchUser("dummy", "remote.example.com");
+      const user = await findOrFetchUserByWebfinger(
+        "dummy",
+        "remote.example.com"
+      );
       // assert
       expect(scope.isDone()).toBe(true);
       expect(user).toEqual(null);
@@ -149,7 +161,10 @@ describe("findOrFetchUser", () => {
           links: [],
         });
       // act
-      const user = await findOrFetchUser("dummy", "remote.example.com");
+      const user = await findOrFetchUserByWebfinger(
+        "dummy",
+        "remote.example.com"
+      );
       // assert
       expect(scope.isDone()).toBe(true);
       expect(user).toEqual(null);
@@ -170,7 +185,10 @@ describe("findOrFetchUser", () => {
         .get("/users/dummyId")
         .reply(200, { invalid: "dummy" });
       // act
-      const user = await findOrFetchUser("dummy", "remote.example.com");
+      const user = await findOrFetchUserByWebfinger(
+        "dummy",
+        "remote.example.com"
+      );
       // assert
       expect(webFingerScope.isDone()).toBe(true);
       expect(remoteUserScope.isDone()).toBe(true);

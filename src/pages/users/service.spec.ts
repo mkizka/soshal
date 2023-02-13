@@ -1,5 +1,5 @@
 import type { User } from "@prisma/client";
-import { findOrFetchUser } from "../../utils/findOrFetchUser";
+import { findOrFetchUserByWebfinger } from "../../utils/findOrFetchUser";
 import { prismaMock } from "../../__mocks__/db";
 import { findOrFetchUserById } from "./service";
 
@@ -14,7 +14,7 @@ const dummyUser: User = {
 };
 
 jest.mock("../../utils/findOrFetchUser");
-const mockedFindOrFetchUser = jest.mocked(findOrFetchUser);
+const mockedFindOrFetchUserByWebFinger = jest.mocked(findOrFetchUserByWebfinger);
 
 describe("findOrFetchUserById", () => {
   test("@から始まらない場合はidとしてDBから引く", async () => {
@@ -30,20 +30,20 @@ describe("findOrFetchUserById", () => {
   });
   test("@が一つの場合はnameをfindOrFetchUserに渡す", async () => {
     // arrange
-    mockedFindOrFetchUser.mockResolvedValue(dummyUser);
+    mockedFindOrFetchUserByWebFinger.mockResolvedValue(dummyUser);
     // act
     const user = await findOrFetchUserById("@dummy");
     // assert
-    expect(mockedFindOrFetchUser).toHaveBeenCalledWith("dummy", undefined);
+    expect(mockedFindOrFetchUserByWebFinger).toHaveBeenCalledWith("dummy", undefined);
     expect(user).toEqual(dummyUser);
   });
   test("@が二つの場合は分割してname,hostをfindOrFetchUserに渡す", async () => {
     // arrange
-    mockedFindOrFetchUser.mockResolvedValue(dummyUser);
+    mockedFindOrFetchUserByWebFinger.mockResolvedValue(dummyUser);
     // act
     const user = await findOrFetchUserById("@dummy@myhost.example.com");
     // assert
-    expect(mockedFindOrFetchUser).toHaveBeenCalledWith(
+    expect(mockedFindOrFetchUserByWebFinger).toHaveBeenCalledWith(
       "dummy",
       "myhost.example.com"
     );

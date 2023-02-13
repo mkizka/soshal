@@ -1,5 +1,5 @@
 import { prisma } from "../../server/db";
-import { findOrFetchUser } from "../../utils/findOrFetchUser";
+import { findOrFetchUserByWebfinger } from "../../utils/findOrFetchUser";
 
 /**
  * userIdは以下のパターンを想定
@@ -14,7 +14,7 @@ export const findOrFetchUserById = async (userId: string) => {
     if (!name) {
       return null;
     }
-    return findOrFetchUser(name, host);
+    return findOrFetchUserByWebfinger(name, host);
   }
   return prisma.user.findFirst({ where: { id: userId } });
 };

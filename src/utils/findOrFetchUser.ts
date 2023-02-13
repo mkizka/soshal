@@ -16,7 +16,7 @@ const resolveWebFingerResponse = (data: object) => {
 /**
  * `name`,`host`を元にWebFingerから`rel==="self"`の`href`を返す
  */
-const fetchHrefByWebFinger = async (name: string, host: string) => {
+const fetchUserIdByWebFinger = async (name: string, host: string) => {
   const remoteUrl = safeUrl(`https://${host}`);
   if (!remoteUrl) {
     return null;
@@ -27,13 +27,13 @@ const fetchHrefByWebFinger = async (name: string, host: string) => {
   if (!response) {
     return null;
   }
-  const href = resolveWebFingerResponse(response.body);
-  if (!href) {
+  const userId = resolveWebFingerResponse(response.body);
+  if (!userId) {
     logger.warn(
-      `${name}@${host} のWebFingerから有効なhrefが取得できませんでした`
+      `${name}@${host} のWebFingerから有効な値が取得できませんでした`
     );
   }
-  return href;
+  return userId;
 };
 
 const personSchema = z.object({
@@ -63,19 +63,7 @@ const fetchValidPerson = async (url: URL) => {
   return parsed.data;
 };
 
-export const findOrFetchUser = async (name: string, host?: string) => {
-  // hostが無いかenv.HOSTと一致するなら自サーバーのユーザー
-  if (host == undefined || host == env.HOST) {
-    return await prisma.user.findFirst({ where: { name } });
-  }
-  // 外部サーバーの場合は、
-  // 1. WebFingerを叩いてhrefを取得
-  // 2. hrefを叩いてActivityを取得
-  // 3. ActivityのpreferredUsernameとhostを見て既存ユーザーか新規作成データを返す
-  const url = await fetchHrefByWebFinger(name, host);
-  if (!url) {
-    return null;
-  }
+export const findOrFetchUserByUserId = async (url: URL) => {
   const person = await fetchValidPerson(url);
   if (!person) {
     logger.warn(`Personの値が不正です`);
@@ -97,4 +85,19 @@ export const findOrFetchUser = async (name: string, host?: string) => {
       publicKey: person.publicKey.publicKeyPem,
     },
   });
+};
+
+export const findOrFetchUserByWebfinger = async (
+  name: string,
+  host?: string
+) => {
+  // hostが無いかenv.HOSTと一致するなら自サーバーのユーザー
+  if (host == undefined || host == env.HOST) {
+    return await prisma.user.findFirst({ where: { name } });
+  }
+  const userId = await fetchUserIdByWebFinger(name, host);
+  if (!userId) {
+    return null;
+  }
+  return findOrFetchUserByUserId(userId);
 };
