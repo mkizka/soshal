@@ -13,10 +13,7 @@ const resolveWebFingerResponse = (data: object) => {
   return safeUrl(href);
 };
 
-/**
- * `name`,`host`を元にWebFingerから`rel==="self"`の`href`を返す
- */
-const fetchUserIdByWebFinger = async (name: string, host: string) => {
+const fetchActorIdByWebFinger = async (name: string, host: string) => {
   const remoteUrl = safeUrl(`https://${host}`);
   if (!remoteUrl) {
     return null;
@@ -27,13 +24,13 @@ const fetchUserIdByWebFinger = async (name: string, host: string) => {
   if (!response) {
     return null;
   }
-  const userId = resolveWebFingerResponse(response.body);
-  if (!userId) {
+  const actorId = resolveWebFingerResponse(response.body);
+  if (!actorId) {
     logger.warn(
       `${name}@${host} のWebFingerから有効な値が取得できませんでした`
     );
   }
-  return userId;
+  return actorId;
 };
 
 const personSchema = z.object({
@@ -63,8 +60,8 @@ const fetchValidPerson = async (url: URL) => {
   return parsed.data;
 };
 
-export const findOrFetchUserByUserId = async (url: URL) => {
-  const person = await fetchValidPerson(url);
+export const findOrFetchUserByActorId = async (actorId: URL) => {
+  const person = await fetchValidPerson(actorId);
   if (!person) {
     logger.warn(`Personの値が不正です`);
     return null;
@@ -95,9 +92,9 @@ export const findOrFetchUserByWebfinger = async (
   if (host == undefined || host == env.HOST) {
     return await prisma.user.findFirst({ where: { name } });
   }
-  const userId = await fetchUserIdByWebFinger(name, host);
-  if (!userId) {
+  const actorId = await fetchActorIdByWebFinger(name, host);
+  if (!actorId) {
     return null;
   }
-  return findOrFetchUserByUserId(userId);
+  return findOrFetchUserByActorId(actorId);
 };
