@@ -4,6 +4,7 @@ import { prismaMock } from "../../../../__mocks__/db";
 import { createMockedContext } from "../../../__mocks__/context";
 import { getServerSideProps } from "./index.page";
 import { findOrFetchUserByActorId } from "../../../../utils/findOrFetchUser";
+import { queue } from "../../../../server/background/queue";
 
 jest.mock("../../../../env/server.mjs", () => ({
   env: {
@@ -18,6 +19,9 @@ const mockedLogger = jest.mocked(logger);
 jest.mock("../../../../utils/findOrFetchUser");
 const mockedFindOrFetchUserByActorId = jest.mocked(findOrFetchUserByActorId);
 
+jest.mock("../../../../server/background/queue");
+const mockedQueue = jest.mocked(queue);
+
 const dummyLocalUser = {
   id: "dummyidlocal",
   name: "dummy_local",
@@ -25,7 +29,7 @@ const dummyLocalUser = {
   emailVerified: null,
   image: null,
   publicKey: null,
-  privateKey: null,
+  privateKey: "privateKey",
 };
 
 const dummyRemoteUser = {
@@ -72,8 +76,23 @@ describe("フォロー", () => {
     await getServerSideProps(ctx);
     // assert
     expect(mockedLogger.info).toHaveBeenCalledWith("完了: フォロー");
-    expect(prismaMock.user.create).not.toHaveBeenCalled();
     expect(prismaMock.follow.create).toHaveBeenCalled();
+    expect(mockedQueue.push).toHaveBeenCalledWith({
+      runner: "relayActivity",
+      params: {
+        activity: {
+          type: "Accept",
+          actor: new URL(ctx.req.body.object),
+          object: {
+            type: "Follow",
+            actor: new URL(ctx.req.body.actor),
+            object: new URL(ctx.req.body.object),
+          },
+        },
+        privateKey: "privateKey",
+        publicKeyId: "https://myhost.example.com/users/dummyidlocal#main-key",
+      },
+    });
     expect(ctx.res.statusCode).toBe(200);
   });
 });

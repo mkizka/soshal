@@ -29,6 +29,10 @@ class Queue {
   }
 
   public startBackground() {
+    if (env.NODE_ENV == "test") {
+      // テスト時はQueueを開始しない
+      return;
+    }
     if (this.isStarted) {
       logger.error("Queueは開始済みです");
       throw new Error();

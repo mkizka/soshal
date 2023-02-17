@@ -1,6 +1,7 @@
 import { handle, json } from "next-runtime";
 import { z } from "zod";
 import { env } from "../../../../env/server.mjs";
+import { queue } from "../../../../server/background/queue";
 import { prisma } from "../../../../server/db";
 import { findOrFetchUserByActorId } from "../../../../utils/findOrFetchUser";
 import { logger } from "../../../../utils/logger";
@@ -62,6 +63,13 @@ export const getServerSideProps = handle({
       );
       return json({}, 400);
     }
+    if (!followee.privateKey) {
+      logger.info(
+        "フォローリクエストで指定されたフォロイーが秘密鍵を持っていませんでした"
+      );
+      // 自ホストのユーザーなら秘密鍵を持っているはずなので、異常な動作
+      return json({}, 503);
+    }
     const follower = await findOrFetchUserByActorId(parsedFollow.data.actor);
     if (!follower) {
       logger.info(
@@ -76,6 +84,18 @@ export const getServerSideProps = handle({
       },
     });
     logger.info("完了: フォロー");
+    queue.push({
+      runner: "relayActivity",
+      params: {
+        activity: {
+          type: "Accept",
+          actor: new URL(`https://${env.HOST}/users/${followee.id}`),
+          object: parsedFollow.data,
+        },
+        publicKeyId: `https://${env.HOST}/users/${followee.id}#main-key`,
+        privateKey: followee.privateKey,
+      },
+    });
     // TODO: Acceptの配送
     return json({}, 200);
   },

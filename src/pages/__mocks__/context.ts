@@ -1,14 +1,14 @@
 import { mockDeep } from "jest-mock-extended";
 import type { GetServerSidePropsContext } from "next";
 
-type Context = GetServerSidePropsContext & {
+type Context<T> = GetServerSidePropsContext & {
   req: GetServerSidePropsContext["req"] & {
-    body: object;
+    body: T;
   };
 };
 
-export const createMockedContext = (req: Partial<Context["req"]>) => {
-  const ctx = mockDeep<Context>();
+export const createMockedContext = <T>(req: Partial<Context<T>["req"]>) => {
+  const ctx = mockDeep<Context<T>>();
   // @ts-ignore
   ctx.req = {
     ...ctx.req,
