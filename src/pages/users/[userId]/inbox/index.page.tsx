@@ -77,12 +77,17 @@ export const getServerSideProps = handle({
       );
       return json({}, 404);
     }
-    await prisma.follow.create({
-      data: {
-        followeeId: followee.id,
-        followerId: follower.id,
-      },
-    });
+    try {
+      await prisma.follow.create({
+        data: {
+          followeeId: followee.id,
+          followerId: follower.id,
+        },
+      });
+    } catch (e) {
+      logger.warn(`フォローに失敗しました: ${e}`);
+      return json({}, 400);
+    }
     logger.info("完了: フォロー");
     queue.push({
       runner: "relayActivity",
