@@ -1,0 +1,14 @@
+version: "3"
+
+volumes:
+  db_data:
+
+services:
+  db:
+    image: postgres:15-alpine
+    ports:
+      - 5432:5432
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=password
