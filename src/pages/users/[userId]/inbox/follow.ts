@@ -5,7 +5,7 @@ import { queue } from "../../../../server/background/queue";
 import { prisma } from "../../../../server/db";
 import { findOrFetchUserByActorId } from "../../../../utils/findOrFetchUser";
 import { logger } from "../../../../utils/logger";
-import { InboxFunction } from "./types.js";
+import type { InboxFunction } from "./types";
 
 const followActivitySchema = z.object({
   type: z.literal("Follow"),

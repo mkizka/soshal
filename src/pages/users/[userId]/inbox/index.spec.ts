@@ -12,9 +12,7 @@ describe("ユーザーinbox", () => {
     ${"Follow"} | ${mockedFollow}
   `("$typeを実装した関数が呼ばれる", async ({ type, fn }) => {
     // arrange
-    const activity = {
-      type,
-    };
+    const activity = { type };
     const ctx = createMockedContext({
       method: "POST",
       headers: {
@@ -36,9 +34,7 @@ describe("ユーザーinbox", () => {
       // arrange
       const activity = {
         type: "Undo",
-        object: {
-          type: "Follow",
-        },
+        object: { type },
       };
       const ctx = createMockedContext({
         method: "POST",
