@@ -5,6 +5,7 @@ import { queue } from "../../../../server/background/queue";
 import { prisma } from "../../../../server/db";
 import { findOrFetchUserByActorId } from "../../../../utils/findOrFetchUser";
 import { logger } from "../../../../utils/logger";
+import { InboxFunction } from "./types.js";
 
 const followActivitySchema = z.object({
   type: z.literal("Follow"),
@@ -35,7 +36,7 @@ const resolveUserId = (actorId: URL) => {
   return actorId.pathname.split("/")[2];
 };
 
-export const follow = async (activity: unknown) => {
+export const follow: InboxFunction = async (activity, options) => {
   // TODO: 署名の検証
   const parsedFollow = followActivitySchema.safeParse(activity);
   if (!parsedFollow.success) {
@@ -72,17 +73,29 @@ export const follow = async (activity: unknown) => {
     return json({}, 404);
   }
   try {
-    await prisma.follow.create({
-      data: {
-        followeeId: followee.id,
-        followerId: follower.id,
-      },
-    });
+    if (options?.undo) {
+      await prisma.follow.delete({
+        where: {
+          followeeId_followerId: {
+            followeeId: followee.id,
+            followerId: follower.id,
+          },
+        },
+      });
+      logger.info("完了: アンフォロー");
+    } else {
+      await prisma.follow.create({
+        data: {
+          followeeId: followee.id,
+          followerId: follower.id,
+        },
+      });
+      logger.info("完了: フォロー");
+    }
   } catch (e) {
-    logger.warn(`フォローに失敗しました: ${e}`);
+    logger.warn(`フォロー/アンフォローに失敗しました: ${e}`);
     return json({}, 400);
   }
-  logger.info("完了: フォロー");
   queue.push({
     runner: "relayActivity",
     params: {
@@ -95,6 +108,5 @@ export const follow = async (activity: unknown) => {
       privateKey: followee.privateKey,
     },
   });
-  // TODO: Acceptの配送
   return json({}, 200);
 };

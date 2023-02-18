@@ -91,3 +91,40 @@ describe("フォロー", () => {
     expect(response.status).toBe(200);
   });
 });
+
+describe("アンフォロー", () => {
+  test("正常系", async () => {
+    // arrange
+    const activity = {
+      type: "Follow",
+      actor: "https://remote.example.com/u/dummy_remote",
+      object: "https://myhost.example.com/users/dummyidlocal",
+    };
+    prismaMock.user.findFirst // <-(2.)
+      .calledWith(object({ where: { id: "dummyidlocal" } }))
+      .mockResolvedValueOnce(dummyLocalUser);
+    mockedFindOrFetchUserByActorId.mockResolvedValueOnce(dummyRemoteUser); // <-(3.)
+    // act
+    const response = await follow(activity, { undo: true });
+    // assert
+    expect(mockedLogger.info).toHaveBeenCalledWith("完了: アンフォロー");
+    expect(prismaMock.follow.delete).toHaveBeenCalled();
+    expect(mockedQueue.push).toHaveBeenCalledWith({
+      runner: "relayActivity",
+      params: {
+        activity: {
+          type: "Accept",
+          actor: new URL(activity.object),
+          object: {
+            type: "Follow",
+            actor: new URL(activity.actor),
+            object: new URL(activity.object),
+          },
+        },
+        privateKey: "privateKey",
+        publicKeyId: "https://myhost.example.com/users/dummyidlocal#main-key",
+      },
+    });
+    expect(response.status).toBe(200);
+  });
+});
