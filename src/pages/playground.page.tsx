@@ -85,7 +85,7 @@ const Followers = () => {
       {follows?.map(({ follower }) => (
         <li key={follower.id}>
           <a href={`/@${follower.name}`}>
-            {follower.name}(id:${follower.id})
+            {follower.name}(id:{follower.id})からフォロー
           </a>
         </li>
       ))}
