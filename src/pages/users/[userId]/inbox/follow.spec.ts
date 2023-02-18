@@ -1,10 +1,9 @@
 import { Matcher } from "jest-mock-extended";
 import { logger } from "../../../../utils/logger";
 import { prismaMock } from "../../../../__mocks__/db";
-import { createMockedContext } from "../../../__mocks__/context";
-import { getServerSideProps } from "./index.page";
 import { findOrFetchUserByActorId } from "../../../../utils/findOrFetchUser";
 import { queue } from "../../../../server/background/queue";
+import { follow } from "./follow";
 
 jest.mock("../../../../env/server.mjs", () => ({
   env: {
@@ -59,21 +58,17 @@ export const object = <T>(expectedValue: T) =>
 describe("フォロー", () => {
   test("正常系", async () => {
     // arrange
-    const ctx = createMockedContext({
-      method: "POST", // <-(1.)
-      headers: { accept: "application/activity+json" },
-      body: {
-        type: "Follow",
-        actor: "https://remote.example.com/u/dummy_remote",
-        object: "https://myhost.example.com/users/dummyidlocal",
-      },
-    });
+    const activity = {
+      type: "Follow",
+      actor: "https://remote.example.com/u/dummy_remote",
+      object: "https://myhost.example.com/users/dummyidlocal",
+    };
     prismaMock.user.findFirst // <-(2.)
       .calledWith(object({ where: { id: "dummyidlocal" } }))
       .mockResolvedValueOnce(dummyLocalUser);
     mockedFindOrFetchUserByActorId.mockResolvedValueOnce(dummyRemoteUser); // <-(3.)
     // act
-    await getServerSideProps(ctx);
+    const response = await follow(activity);
     // assert
     expect(mockedLogger.info).toHaveBeenCalledWith("完了: フォロー");
     expect(prismaMock.follow.create).toHaveBeenCalled();
@@ -82,17 +77,17 @@ describe("フォロー", () => {
       params: {
         activity: {
           type: "Accept",
-          actor: new URL(ctx.req.body.object),
+          actor: new URL(activity.object),
           object: {
             type: "Follow",
-            actor: new URL(ctx.req.body.actor),
-            object: new URL(ctx.req.body.object),
+            actor: new URL(activity.actor),
+            object: new URL(activity.object),
           },
         },
         privateKey: "privateKey",
         publicKeyId: "https://myhost.example.com/users/dummyidlocal#main-key",
       },
     });
-    expect(ctx.res.statusCode).toBe(200);
+    expect(response.status).toBe(200);
   });
 });
