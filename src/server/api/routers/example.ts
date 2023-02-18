@@ -64,4 +64,11 @@ export const exampleRouter = createTRPCRouter({
     .mutation(({ ctx, input }) => {
       return ctx.prisma.note.delete({ where: { id: input } });
     }),
+
+  getAllFollows: protectedProcedure.query(({ ctx }) => {
+    return ctx.prisma.follow.findMany({
+      where: { followeeId: ctx.session.user.id },
+      include: { follower: true },
+    });
+  }),
 });

@@ -78,13 +78,30 @@ const AddNote = () => {
   );
 };
 
+const Followers = () => {
+  const { data: follows } = api.example.getAllFollows.useQuery();
+  return (
+    <ul>
+      {follows?.map(({ follower }) => (
+        <li key={follower.id}>
+          <a href={`/@${follower.name}`}>
+            {follower.name}(id:${follower.id})
+          </a>
+        </li>
+      ))}
+    </ul>
+  );
+};
+
 const PlayGround = () => {
   return (
     <div>
       <ChangeMyName />
       <ResetMe />
       <AddNote />
+      <Followers />
     </div>
   );
 };
+
 export default PlayGround;
