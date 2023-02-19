@@ -9,6 +9,7 @@ env:
   DOCKER_IMAGE: ghcr.io/mkizka/soshal:pr${{ github.event.pull_request.number }}
   CAPROVER_URL: paas.mkizka.dev
   APP_NAME: pr${{ github.event.pull_request.number }}-soshal
+  APP_DOMAIN: ${{ env.APP_NAME }}.mkizka.dev
 
 jobs:
   build:
@@ -39,12 +40,16 @@ jobs:
           npx caprover api \
             -m POST \
             -t /user/apps/appDefinitions/customdomain \
-            -d '{"appName":"pr1-soshal","customDomain":"${{ env.APP_NAME }}.mkizka.dev"}' \
+            -d '{"appName":"pr1-soshal","customDomain":"${{ env.APP_DOMAIN }}"}' \
             -u ${{ env.CAPROVER_URL }} \
             -p ${{ secrets.CAPROVER_PASSWORD }}
       - name: Set environment variables
         run: |
-          envVars=$(echo ${{ secrets.APP_ENVS }} | npx dotenv-to-json | jq -c 'to_entries')
+          envVars=$(\
+            echo ${{ secrets.APP_ENVS }} |\
+            npx dotenv-to-json |\
+            jq -c '.DATABASE_URL=.DATABASE_URL+"${{ env.APP_NAME }}"' |\
+            jq -c '.NEXTAUTH_URL="https://${{ env.APP_DOMAIN }}"')
           npx caprover api \
             -m POST \
             -t /user/apps/appDefinitions/update \
