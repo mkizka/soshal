@@ -27,7 +27,7 @@ jobs:
       - name: Create new app
         continue-on-error: true
         run: |
-          caprover api \
+          npx caprover api \
             -m POST \
             -t /user/apps/appDefinitions/register \
             -d '{"appName":"${{ env.APP_NAME }}","hasPersistentData":false}' \
@@ -36,7 +36,7 @@ jobs:
       - name:
         continue-on-error: true
         run: |
-          caprover api \
+          npx caprover api \
             -m POST \
             -t /user/apps/appDefinitions/customdomain \
             -d '{"appName":"pr1-soshal","customDomain":"${{ env.APP_NAME }}.mkizka.dev"}' \
@@ -45,7 +45,7 @@ jobs:
       - name: Set environment variables
         run: |
           envVars=$(echo ${{ secrets.APP_ENVS }} | npx dotenv-to-json | jq -c 'to_entries')
-          caprover api \
+          npx caprover api \
             -m POST \
             -t /user/apps/appDefinitions/update \
             -d '{"appName":"${{ env.APP_NAME }}","envVars":$envVars}' \
@@ -53,7 +53,7 @@ jobs:
             -p ${{ secrets.CAPROVER_PASSWORD }}
       - name: Deploy app
         run: |
-          caprover deploy \
+          npx caprover deploy \
             -a ${{ env.APP_NAME }} \
             -i ${{ env.DOCKER_IMAGE }} \
             -u ${{ env.CAPROVER_URL }} \
