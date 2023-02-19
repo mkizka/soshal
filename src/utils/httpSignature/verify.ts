@@ -1,10 +1,11 @@
 import crypto from "crypto";
+import type { IncomingHttpHeaders } from "http";
 import { z } from "zod";
 import { textOf } from "./utils";
 
 const signatureSchema = z.object({
   keyId: z.string().url(),
-  algorithm: z.string(),
+  algorithm: z.literal<string>("rsa-sha256"),
   headers: z.string(),
   signature: z.string(),
 });
@@ -19,12 +20,21 @@ const parse = (signature: string) => {
       result[k] = v.slice(1, v.length - 1);
     }
   }
-  const parsedSignature = signatureSchema.safeParse(result);
-  if (parsedSignature.success) {
-    return parsedSignature.data;
-  }
-  return null;
+  return signatureSchema.safeParse(result);
 };
+
+const headersSchema = z
+  .object({
+    signature: z.string().transform((val, ctx) => {
+      const parsed = parse(val);
+      if (!parsed.success) {
+        parsed.error.issues.forEach(ctx.addIssue);
+        return z.NEVER;
+      }
+      return parsed.data;
+    }),
+  })
+  .passthrough();
 
 const createVerify = (textToSign: string) => {
   const verify = crypto.createVerify("sha256");
@@ -43,38 +53,29 @@ type VerifyResult =
     };
 
 export const verifyActivity = (
-  requestTarget: string,
-  header: { [key: string]: string },
+  resolvedUrl: string,
+  headers: IncomingHttpHeaders,
   publicKey: string
 ): VerifyResult => {
-  if (!header.signature) {
+  const parsedHeaders = headersSchema.safeParse(headers);
+  if (!parsedHeaders.success) {
     return {
       isValid: false,
-      reason: "Signatureヘッダーがありませんでした",
+      reason:
+        parsedHeaders.error.issues[0]?.message ||
+        "リクエストヘッダーが不正でした",
     };
   }
-  const parsedSignature = parse(header.signature);
-  if (!parsedSignature) {
-    return {
-      isValid: false,
-      reason: `ヘッダーの型が不正でした`,
-    };
-  }
-  if (parsedSignature.algorithm != "rsa-sha256") {
-    return {
-      isValid: false,
-      reason: `${parsedSignature.algorithm}はサポートしていないアルゴリズムです`,
-    };
-  }
+  const { signature, ...headersWithoutSignature } = parsedHeaders.data;
   const headerToSign = {
-    "(request-target)": requestTarget,
-    ...header,
+    "(request-target)": `post ${resolvedUrl}`,
+    ...headersWithoutSignature,
   };
-  const order = parsedSignature.headers.split(" ");
+  const order = signature.headers.split(" ");
   const textToSign = textOf(headerToSign, order);
   const isValid = createVerify(textToSign).verify(
     publicKey,
-    parsedSignature.signature,
+    signature.signature,
     "base64"
   );
   if (!isValid) {
