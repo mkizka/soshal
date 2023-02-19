@@ -21,6 +21,7 @@ jobs:
           registry: ghcr.io
           username: mkizka
           password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/setup-buildx-action@v2
       - uses: docker/build-push-action@v4
         with:
           push: true
