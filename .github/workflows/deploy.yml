@@ -7,6 +7,8 @@ on:
 
 env:
   DOCKER_IMAGE: ghcr.io/mkizka/soshal:pr${{ github.event.pull_request.number }}
+  CAPROVER_URL: paas.mkizka.dev
+  APP_NAME: pr${{ github.event.pull_request.number }}-soshal
 
 jobs:
   build:
@@ -22,3 +24,37 @@ jobs:
         with:
           push: true
           tags: ${{ env.DOCKER_IMAGE }}
+      - name: Create new app
+        continue-on-error: true
+        run: |
+          caprover api \
+            -m POST \
+            -t /user/apps/appDefinitions/register \
+            -d '{"appName":"${{ env.APP_NAME }}","hasPersistentData":false}' \
+            -u ${{ env.CAPROVER_URL }} \
+            -p ${{ secrets.CAPROVER_PASSWORD }}
+      - name:
+        continue-on-error: true
+        run: |
+          caprover api \
+            -m POST \
+            -t /user/apps/appDefinitions/customdomain \
+            -d '{"appName":"pr1-soshal","customDomain":"${{ env.APP_NAME }}.mkizka.dev"}' \
+            -u ${{ env.CAPROVER_URL }} \
+            -p ${{ secrets.CAPROVER_PASSWORD }}
+      - name: Set environment variables
+        run: |
+          envVars=$(echo ${{ secrets.APP_ENVS }} | npx dotenv-to-json | jq -c 'to_entries')
+          caprover api \
+            -m POST \
+            -t /user/apps/appDefinitions/update \
+            -d '{"appName":"${{ env.APP_NAME }}","envVars":$envVars}' \
+            -u ${{ env.CAPROVER_URL }} \
+            -p ${{ secrets.CAPROVER_PASSWORD }}
+      - name: Deploy app
+        run: |
+          caprover deploy \
+            -a ${{ env.APP_NAME }} \
+            -i ${{ env.DOCKER_IMAGE }} \
+            -u ${{ env.CAPROVER_URL }} \
+            -p ${{ secrets.CAPROVER_PASSWORD }}

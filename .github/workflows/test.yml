@@ -18,4 +18,4 @@ jobs:
           node-version: 18
           cache: pnpm
       - run: pnpm i
-      - run: pnpm test
+      - run: SKIP_ENV_VALIDATION=1 pnpm test
