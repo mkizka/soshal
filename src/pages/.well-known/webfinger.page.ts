@@ -37,7 +37,7 @@ export const getServerSideProps: GetServerSideProps = async ({
         {
           rel: "self",
           type: "application/activity+json",
-          href: `https://${env.HOST}/@${name}`,
+          href: `https://${env.HOST}/users/${user.id}`,
         },
       ],
     })
