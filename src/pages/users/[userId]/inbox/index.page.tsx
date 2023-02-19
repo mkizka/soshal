@@ -1,6 +1,7 @@
 import { handle, json } from "next-runtime";
 import { z } from "zod";
 import { findOrFetchUserByActorId } from "../../../../utils/findOrFetchUser";
+import { verifyActivity } from "../../../../utils/httpSignature/verify";
 import { logger } from "../../../../utils/logger";
 import { follow } from "./follow";
 
@@ -41,7 +42,7 @@ const anyActivitySchema = z.union([
 ]);
 
 export const getServerSideProps = handle({
-  async post({ req }) {
+  async post({ req, resolvedUrl }) {
     const activity = anyActivitySchema.safeParse(req.body);
     if (!activity.success) {
       logger.info(`検証エラー: ${JSON.stringify(req.body)}`);
@@ -52,7 +53,16 @@ export const getServerSideProps = handle({
       logger.info("actorで指定されたユーザーが見つかりませんでした");
       return json({}, 400);
     }
-    // TODO: 署名の検証
+    // TODO: Userの公開鍵を必須にする
+    const result = verifyActivity(
+      resolvedUrl,
+      req.headers,
+      actorUser.publicKey!
+    );
+    if (!result.isValid) {
+      logger.info("リクエストヘッダの署名が不正でした: " + result.reason);
+      return json({}, 400);
+    }
     if (activity.data.type == "Undo") {
       return inbox[activity.data.object.type](activity.data.object, actorUser, {
         undo: true,

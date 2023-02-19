@@ -7,12 +7,18 @@ type Context<T> = GetServerSidePropsContext & {
   };
 };
 
-export const createMockedContext = <T>(req: Partial<Context<T>["req"]>) => {
+export const createMockedContext = <T>(
+  req: Partial<Context<T>["req"]>,
+  resolvedUrl?: string
+) => {
   const ctx = mockDeep<Context<T>>();
   // @ts-ignore
   ctx.req = {
     ...ctx.req,
     ...req,
   };
+  if (resolvedUrl) {
+    ctx.resolvedUrl = resolvedUrl;
+  }
   return ctx;
 };

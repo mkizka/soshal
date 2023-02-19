@@ -1,5 +1,6 @@
 import { json } from "next-runtime";
 import { findOrFetchUserByActorId } from "../../../../utils/findOrFetchUser";
+import { verifyActivity } from "../../../../utils/httpSignature/verify";
 import { createMockedContext } from "../../../__mocks__/context";
 import { follow } from "./follow";
 import { getServerSideProps } from "./index.page";
@@ -9,6 +10,9 @@ const mockedFollow = jest.mocked(follow).mockResolvedValue(json({}, 200));
 
 jest.mock("../../../../utils/findOrFetchUser");
 const mockedFindOrFetchUserByActorId = jest.mocked(findOrFetchUserByActorId);
+
+jest.mock("../../../../utils/httpSignature/verify");
+const mockedVerifyActivity = jest.mocked(verifyActivity);
 
 const dummyRemoteUser = {
   id: "dummyidremote",
@@ -30,17 +34,26 @@ describe("ユーザーinbox", () => {
       type,
       actor: "https://remote.example.com/u/dummy_remote",
     };
-    const ctx = createMockedContext({
-      method: "POST",
-      headers: {
-        accept: "application/activity+json",
+    const ctx = createMockedContext(
+      {
+        method: "POST",
+        headers: {
+          accept: "application/activity+json",
+        },
+        body: activity,
       },
-      body: activity,
-    });
+      "/users/foo/inbox"
+    );
     mockedFindOrFetchUserByActorId.mockResolvedValue(dummyRemoteUser);
+    mockedVerifyActivity.mockReturnValue({ isValid: true });
     // act
     await getServerSideProps(ctx);
     // assert
+    expect(mockedVerifyActivity).toHaveBeenCalledWith(
+      ctx.resolvedUrl,
+      ctx.req.headers,
+      dummyRemoteUser.publicKey
+    );
     expect(fn).toBeCalledWith(
       {
         ...activity,
@@ -61,17 +74,26 @@ describe("ユーザーinbox", () => {
         actor: "https://remote.example.com/u/dummy_remote",
         object: { type },
       };
-      const ctx = createMockedContext({
-        method: "POST",
-        headers: {
-          accept: "application/activity+json",
+      const ctx = createMockedContext(
+        {
+          method: "POST",
+          headers: {
+            accept: "application/activity+json",
+          },
+          body: activity,
         },
-        body: activity,
-      });
+        "/users/foo/inbox"
+      );
       mockedFindOrFetchUserByActorId.mockResolvedValue(dummyRemoteUser);
+      mockedVerifyActivity.mockReturnValue({ isValid: true });
       // act
       await getServerSideProps(ctx);
       // assert
+      expect(mockedVerifyActivity).toHaveBeenCalledWith(
+        ctx.resolvedUrl,
+        ctx.req.headers,
+        dummyRemoteUser.publicKey
+      );
       expect(fn).toBeCalledWith(activity.object, dummyRemoteUser, {
         undo: true,
       });
@@ -94,6 +116,34 @@ describe("ユーザーinbox", () => {
     // act
     await getServerSideProps(ctx);
     // assert
+    expect(ctx.res.statusCode).toBe(400);
+  });
+  test("ヘッダーの署名による検証が不正だった場合は400を返す", async () => {
+    // arrange
+    const activity = {
+      type: "Follow",
+      actor: "https://remote.example.com/u/dummy_remote",
+    };
+    const ctx = createMockedContext(
+      {
+        method: "POST",
+        headers: {
+          accept: "application/activity+json",
+        },
+        body: activity,
+      },
+      "/users/foo/inbox"
+    );
+    mockedFindOrFetchUserByActorId.mockResolvedValue(dummyRemoteUser);
+    mockedVerifyActivity.mockReturnValue({ isValid: false, reason: "test" });
+    // act
+    await getServerSideProps(ctx);
+    // assert
+    expect(mockedVerifyActivity).toHaveBeenCalledWith(
+      ctx.resolvedUrl,
+      ctx.req.headers,
+      dummyRemoteUser.publicKey
+    );
     expect(ctx.res.statusCode).toBe(400);
   });
   test("未実装のtypeの場合は400を返す", async () => {
