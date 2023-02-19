@@ -45,7 +45,7 @@ jobs:
             -p ${{ secrets.CAPROVER_PASSWORD }}
       - name: Set environment variables
         run: |
-          data=$(jq -n \
+          data=$(jq -cn \
             --arg DATABASE_URL "${{ secrets.DATABASE_URL }}/${{ env.APP_NAME }}" \
             --arg NEXTAUTH_SECRET "${{ secrets.NEXTAUTH_SECRET }}" \
             --arg NEXTAUTH_URL https://${{ env.APP_DOMAIN }} \
@@ -58,7 +58,7 @@ jobs:
           npx caprover api \
             -m POST \
             -t /user/apps/appDefinitions/update \
-            -d $data \
+            -d "$data" \
             -u ${{ env.CAPROVER_URL }} \
             -p ${{ secrets.CAPROVER_PASSWORD }}
       - name: Deploy app
