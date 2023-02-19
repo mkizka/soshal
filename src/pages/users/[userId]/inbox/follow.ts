@@ -44,7 +44,10 @@ export const follow: InboxFunction = async (activity, actorUser, options) => {
   }
   const followeeId = resolveUserId(new URL(parsedFollow.data.object));
   if (!followeeId) {
-    logger.info("フォローリクエストで指定されたフォロイーURLが不正でした");
+    logger.info(
+      "フォローリクエストで指定されたフォロイーURLが不正でした: " +
+        parsedFollow.data.object
+    );
     return json({}, 400);
   }
   const followee = await prisma.user.findFirst({
