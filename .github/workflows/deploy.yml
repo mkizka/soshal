@@ -1,8 +1,12 @@
-name: test
+name: deploy
 
 on:
-  - push
-  - pull_request
+  push:
+    branches: main
+  pull_request:
+
+env:
+  DOCKER_IMAGE: ghcr.io/mkizka/soshal:pr${{ github.event.pull_request.number }}
 
 jobs:
   build:
@@ -17,4 +21,4 @@ jobs:
       - uses: docker/build-push-action@v4
         with:
           push: true
-          tags: ghcr.io/mkizka/soshal:${{ github.event.pull_request.number }}
+          tags: ${{ env.DOCKER_IMAGE }}
