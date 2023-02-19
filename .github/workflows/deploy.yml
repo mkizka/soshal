@@ -62,7 +62,7 @@ jobs:
             --arg appName ${{ env.APP_NAME }} \
             --arg instanceCount 1 \
             --arg containerHttpPort 3000 \
-            --arg envVars "$envVars" \
+            --argjson envVars "$envVars" \
             '$ARGS.named')
           npx caprover api \
             -m POST \
