@@ -47,7 +47,7 @@ jobs:
             -p ${{ secrets.CAPROVER_PASSWORD }}
       - name: Set environment variables
         run: |
-          data=$(jq -cn \
+          envVars=$(jq -cn \
             --arg DATABASE_URL "${{ secrets.DATABASE_URL }}/${{ env.APP_NAME }}" \
             --arg NEXTAUTH_SECRET "${{ secrets.NEXTAUTH_SECRET }}" \
             --arg NEXTAUTH_URL https://${{ env.APP_DOMAIN }} \
@@ -56,7 +56,14 @@ jobs:
             --arg EMAIL_SERVER_HOST in-v3.mailjet.com \
             --arg EMAIL_SERVER_PORT 587 \
             --arg EMAIL_FROM mail@test.mkizka.dev \
-            '$ARGS.named | to_entries | {"appName":"${{ env.APP_NAME }}","envVars":.}')
+            '$ARGS.named | to_entries')
+          data=$(jq -cn \
+            --arg appName ${{ env.APP_NAME }} \
+            --arg instanceCount 1 \
+            --arg containerHttpPort 3000 \
+            --arg envVars "$envVars" \
+            '$ARGS.named')
+          )
           npx caprover api \
             -m POST \
             -t /user/apps/appDefinitions/update \
