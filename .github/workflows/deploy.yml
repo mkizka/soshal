@@ -34,7 +34,7 @@ jobs:
             -d '{"appName":"${{ env.APP_NAME }}","hasPersistentData":false}' \
             -u ${{ env.CAPROVER_URL }} \
             -p ${{ secrets.CAPROVER_PASSWORD }}
-      - name:
+      - name: Set custom domain
         continue-on-error: true
         run: |
           npx caprover api \
@@ -45,15 +45,20 @@ jobs:
             -p ${{ secrets.CAPROVER_PASSWORD }}
       - name: Set environment variables
         run: |
-          envVars=$(\
-            echo ${{ secrets.APP_ENVS }} |\
-            npx dotenv-to-json |\
-            jq -c '.DATABASE_URL=.DATABASE_URL+"${{ env.APP_NAME }}"' |\
-            jq -c '.NEXTAUTH_URL="https://${{ env.APP_DOMAIN }}"')
+          data=$(jq -n \
+            --arg DATABASE_URL "${{ secrets.DATABASE_URL }}/${{ env.APP_NAME }}" \
+            --arg NEXTAUTH_SECRET "${{ secrets.NEXTAUTH_SECRET }}" \
+            --arg NEXTAUTH_URL https://${{ env.APP_DOMAIN }} \
+            --arg EMAIL_SERVER_USER "${{ secrets.EMAIL_SERVER_USER }}" \
+            --arg EMAIL_SERVER_PASS "${{ secrets.EMAIL_SERVER_PASS }}" \
+            --arg EMAIL_SERVER_HOST in-v3.mailjet.com \
+            --arg EMAIL_SERVER_PORT 587 \
+            --arg EMAIL_FROM mail@test.mkizka.dev \
+            '{"appName":"${{ env.APP_NAME }}","envVars":$envVars} | to_entries')
           npx caprover api \
             -m POST \
             -t /user/apps/appDefinitions/update \
-            -d '{"appName":"${{ env.APP_NAME }}","envVars":$envVars}' \
+            -d $data \
             -u ${{ env.CAPROVER_URL }} \
             -p ${{ secrets.CAPROVER_PASSWORD }}
       - name: Deploy app
