@@ -42,7 +42,9 @@ export const getServerSideProps = handle({
       logger.info(`検証エラー: ${JSON.stringify(req.body)}`);
       return json({}, 400);
     }
-    const actorUser = await findOrFetchUserByActorId(new URL(activity.data.actor));
+    const actorUser = await findOrFetchUserByActorId(
+      new URL(activity.data.actor)
+    );
     if (!actorUser) {
       logger.info("actorで指定されたユーザーが見つかりませんでした");
       return json({}, 400);

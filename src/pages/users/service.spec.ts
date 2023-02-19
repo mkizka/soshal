@@ -14,7 +14,9 @@ const dummyUser: User = {
 };
 
 jest.mock("../../utils/findOrFetchUser");
-const mockedFindOrFetchUserByWebFinger = jest.mocked(findOrFetchUserByWebfinger);
+const mockedFindOrFetchUserByWebFinger = jest.mocked(
+  findOrFetchUserByWebfinger
+);
 
 describe("findOrFetchUserById", () => {
   test("@から始まらない場合はidとしてDBから引く", async () => {
@@ -34,7 +36,10 @@ describe("findOrFetchUserById", () => {
     // act
     const user = await findOrFetchUserById("@dummy");
     // assert
-    expect(mockedFindOrFetchUserByWebFinger).toHaveBeenCalledWith("dummy", undefined);
+    expect(mockedFindOrFetchUserByWebFinger).toHaveBeenCalledWith(
+      "dummy",
+      undefined
+    );
     expect(user).toEqual(dummyUser);
   });
   test("@が二つの場合は分割してname,hostをfindOrFetchUserに渡す", async () => {
