@@ -25,6 +25,8 @@ jobs:
         with:
           push: true
           tags: ${{ env.DOCKER_IMAGE }}
+          cache-from: type=registry,ref=${{ env.DOCKER_IMAGE }}
+          cache-to: type=registry,ref=${{ env.DOCKER_IMAGE }},mode=max
       - name: Create new app
         continue-on-error: true
         run: |
