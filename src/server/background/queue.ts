@@ -1,4 +1,4 @@
-import { env } from "../../env/server.mjs";
+import { env } from "../../utils/env";
 import { globalize } from "../../utils/globalize";
 import { logger } from "../../utils/logger";
 import { relayActivity } from "./runners/relay";

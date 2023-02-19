@@ -1,7 +1,7 @@
 import type { GetServerSideProps } from "next";
-import { env } from "../../../../env/server.mjs";
 import { prisma } from "../../../../server/db";
 import { activityStreams } from "../../../../utils/activitypub";
+import { env } from "../../../../utils/env";
 
 // eslint-disable-next-line import/no-anonymous-default-export
 export default () => null;

@@ -1,11 +1,11 @@
 import { z } from "zod";
-import { env } from "../../../env/server.mjs";
 
 import { activityStreams } from "../../../utils/activitypub";
 import { logger } from "../../../utils/logger";
 import { prisma } from "../../db";
 import { queue } from "../../background/queue";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { env } from "../../../utils/env";
 
 export const noteRouter = createTRPCRouter({
   create: protectedProcedure

@@ -1,5 +1,5 @@
 import { GetServerSideProps } from "next";
-import { env } from "../../env/server.mjs";
+import { env } from "../../utils/env";
 import { prisma } from "../../server/db";
 
 const Noop = () => undefined;

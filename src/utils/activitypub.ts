@@ -1,6 +1,6 @@
 import type { User, Note } from "@prisma/client";
 import type { AP } from "activitypub-core-types";
-import { env } from "../env/server.mjs";
+import { env } from "./env";
 
 const required = <T>(value: T | null | undefined) => {
   if (value === null || value === undefined) throw new Error("値が必要です");

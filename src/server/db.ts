@@ -1,6 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-
-import { env } from "../env/server.mjs";
+import { env } from "../utils/env";
 import { globalize } from "../utils/globalize";
 
 export const prisma = globalize(

@@ -1,8 +1,8 @@
 import { json } from "next-runtime";
 import { z } from "zod";
-import { env } from "../../../../env/server.mjs";
 import { queue } from "../../../../server/background/queue";
 import { prisma } from "../../../../server/db";
+import { env } from "../../../../utils/env";
 import { logger } from "../../../../utils/logger";
 import type { InboxFunction } from "./types";
 

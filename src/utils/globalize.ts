@@ -1,4 +1,4 @@
-import { env } from "../env/server.mjs";
+import { env } from "./env";
 
 declare const global: {
   [key: string]: unknown;

@@ -4,7 +4,7 @@ import { prismaMock } from "../../../../__mocks__/db";
 import { queue } from "../../../../server/background/queue";
 import { follow } from "./follow";
 
-jest.mock("../../../../env/server.mjs", () => ({
+jest.mock("../../../../utils/env", () => ({
   env: {
     ...process.env,
     HOST: "myhost.example.com",
