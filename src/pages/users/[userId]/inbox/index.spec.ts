@@ -24,6 +24,18 @@ const dummyRemoteUser = {
   privateKey: null,
 };
 
+const createMockedActivityContext = (activity: unknown) =>
+  createMockedContext(
+    {
+      method: "POST",
+      headers: {
+        accept: "application/activity+json",
+      },
+      body: activity,
+    },
+    "/users/foo/inbox"
+  );
+
 describe("ユーザーinbox", () => {
   test.each`
     type        | fn
@@ -34,16 +46,7 @@ describe("ユーザーinbox", () => {
       type,
       actor: "https://remote.example.com/u/dummy_remote",
     };
-    const ctx = createMockedContext(
-      {
-        method: "POST",
-        headers: {
-          accept: "application/activity+json",
-        },
-        body: activity,
-      },
-      "/users/foo/inbox"
-    );
+    const ctx = createMockedActivityContext(activity);
     mockedFindOrFetchUserByActorId.mockResolvedValue(dummyRemoteUser);
     mockedVerifyActivity.mockReturnValue({ isValid: true });
     // act
@@ -74,16 +77,7 @@ describe("ユーザーinbox", () => {
         actor: "https://remote.example.com/u/dummy_remote",
         object: { type },
       };
-      const ctx = createMockedContext(
-        {
-          method: "POST",
-          headers: {
-            accept: "application/activity+json",
-          },
-          body: activity,
-        },
-        "/users/foo/inbox"
-      );
+      const ctx = createMockedActivityContext(activity);
       mockedFindOrFetchUserByActorId.mockResolvedValue(dummyRemoteUser);
       mockedVerifyActivity.mockReturnValue({ isValid: true });
       // act
@@ -105,13 +99,7 @@ describe("ユーザーinbox", () => {
       type: "Follow",
       actor: "https://remote.example.com/u/dummy_remote",
     };
-    const ctx = createMockedContext({
-      method: "POST",
-      headers: {
-        accept: "application/activity+json",
-      },
-      body: activity,
-    });
+    const ctx = createMockedActivityContext(activity);
     mockedFindOrFetchUserByActorId.mockResolvedValue(null);
     // act
     await getServerSideProps(ctx);
@@ -124,16 +112,7 @@ describe("ユーザーinbox", () => {
       type: "Follow",
       actor: "https://remote.example.com/u/dummy_remote",
     };
-    const ctx = createMockedContext(
-      {
-        method: "POST",
-        headers: {
-          accept: "application/activity+json",
-        },
-        body: activity,
-      },
-      "/users/foo/inbox"
-    );
+    const ctx = createMockedActivityContext(activity);
     mockedFindOrFetchUserByActorId.mockResolvedValue(dummyRemoteUser);
     mockedVerifyActivity.mockReturnValue({ isValid: false, reason: "test" });
     // act
@@ -152,13 +131,7 @@ describe("ユーザーinbox", () => {
       type: "NotImplemented",
       actor: "https://remote.example.com/u/dummy_remote",
     };
-    const ctx = createMockedContext({
-      method: "POST",
-      headers: {
-        accept: "application/activity+json",
-      },
-      body: activity,
-    });
+    const ctx = createMockedActivityContext(activity);
     // act
     await getServerSideProps(ctx);
     // assert
@@ -170,13 +143,7 @@ describe("ユーザーinbox", () => {
       invalid: "value",
       actor: "https://remote.example.com/u/dummy_remote",
     };
-    const ctx = createMockedContext({
-      method: "POST",
-      headers: {
-        accept: "application/activity+json",
-      },
-      body: activity,
-    });
+    const ctx = createMockedActivityContext(activity);
     // act
     await getServerSideProps(ctx);
     // assert
