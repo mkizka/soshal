@@ -9,7 +9,7 @@ env:
   DOCKER_IMAGE: ghcr.io/mkizka/soshal:pr${{ github.event.pull_request.number }}
   CAPROVER_URL: paas.mkizka.dev
   APP_NAME: pr${{ github.event.pull_request.number }}-soshal
-  APP_DOMAIN: ${{ env.APP_NAME }}.mkizka.dev
+  APP_DOMAIN: pr${{ github.event.pull_request.number }}-soshal.mkizka.dev
 
 jobs:
   build:
