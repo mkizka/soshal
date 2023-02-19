@@ -2,31 +2,29 @@ import { json } from "next-runtime";
 import { z } from "zod";
 import { env } from "../../../../env/server.mjs";
 import { queue } from "../../../../server/background/queue";
-import { prisma } from "../../../../server/db"; 
+import { prisma } from "../../../../server/db";
 import { logger } from "../../../../utils/logger";
 import type { InboxFunction } from "./types";
 
-const followActivitySchema = z.object({
-  type: z.literal("Follow"),
-  actor: z
-    .string()
-    .url()
-    .transform((val) => new URL(val)),
-  object: z
-    .string()
-    .url()
-    .transform((val, ctx) => {
-      const url = new URL(val);
-      if (url.host != env.HOST) {
-        ctx.addIssue({
-          code: "custom",
-          message: "フォロー先が自ホストではありません",
-        });
-        return z.NEVER;
-      }
-      return url;
-    }),
-});
+const followActivitySchema = z
+  .object({
+    type: z.literal("Follow"),
+    actor: z.string().url(),
+    object: z
+      .string()
+      .url()
+      .transform((val, ctx) => {
+        if (new URL(val).host != env.HOST) {
+          ctx.addIssue({
+            code: "custom",
+            message: "フォロー先が自ホストではありません",
+          });
+          return z.NEVER;
+        }
+        return val;
+      }),
+  })
+  .passthrough();
 
 const resolveUserId = (actorId: URL) => {
   if (!actorId.pathname.startsWith("/users/")) {
@@ -44,7 +42,7 @@ export const follow: InboxFunction = async (activity, actorUser, options) => {
     );
     return json({}, 400);
   }
-  const followeeId = resolveUserId(parsedFollow.data.object);
+  const followeeId = resolveUserId(new URL(parsedFollow.data.object));
   if (!followeeId) {
     logger.info("フォローリクエストで指定されたフォロイーURLが不正でした");
     return json({}, 400);
@@ -93,7 +91,11 @@ export const follow: InboxFunction = async (activity, actorUser, options) => {
       activity: {
         type: "Accept",
         actor: new URL(`https://${env.HOST}/users/${followee.id}`),
-        object: parsedFollow.data,
+        object: {
+          ...parsedFollow.data,
+          actor: new URL(parsedFollow.data.actor),
+          object: new URL(parsedFollow.data.object),
+        },
       },
       publicKeyId: `https://${env.HOST}/users/${followee.id}#main-key`,
       privateKey: followee.privateKey,

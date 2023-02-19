@@ -19,19 +19,13 @@ const anyActivitySchema = z.union([
   z
     .object({
       type: z.enum(keysOf(inbox)),
-      actor: z
-        .string()
-        .url()
-        .transform((val) => new URL(val)),
+      actor: z.string().url(),
     })
     .passthrough(),
   z
     .object({
       type: z.literal("Undo"),
-      actor: z
-        .string()
-        .url()
-        .transform((val) => new URL(val)),
+      actor: z.string().url(),
       object: z
         .object({
           type: z.enum(keysOf(inbox)),
@@ -48,7 +42,7 @@ export const getServerSideProps = handle({
       logger.info(`検証エラー: ${JSON.stringify(req.body)}`);
       return json({}, 400);
     }
-    const actorUser = await findOrFetchUserByActorId(activity.data.actor);
+    const actorUser = await findOrFetchUserByActorId(new URL(activity.data.actor));
     if (!actorUser) {
       logger.info("actorで指定されたユーザーが見つかりませんでした");
       return json({}, 400);

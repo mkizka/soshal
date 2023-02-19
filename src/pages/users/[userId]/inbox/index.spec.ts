@@ -57,13 +57,7 @@ describe("ユーザーinbox", () => {
       ctx.req.headers,
       dummyRemoteUser.publicKey
     );
-    expect(fn).toBeCalledWith(
-      {
-        ...activity,
-        actor: new URL(activity.actor),
-      },
-      dummyRemoteUser
-    );
+    expect(fn).toBeCalledWith(activity, dummyRemoteUser);
   });
   test.each`
     type        | fn
