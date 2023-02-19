@@ -2,8 +2,7 @@ import { json } from "next-runtime";
 import { z } from "zod";
 import { env } from "../../../../env/server.mjs";
 import { queue } from "../../../../server/background/queue";
-import { prisma } from "../../../../server/db";
-import { findOrFetchUserByActorId } from "../../../../utils/findOrFetchUser";
+import { prisma } from "../../../../server/db"; 
 import { logger } from "../../../../utils/logger";
 import type { InboxFunction } from "./types";
 
@@ -36,8 +35,7 @@ const resolveUserId = (actorId: URL) => {
   return actorId.pathname.split("/")[2];
 };
 
-export const follow: InboxFunction = async (activity, options) => {
-  // TODO: 署名の検証
+export const follow: InboxFunction = async (activity, actorUser, options) => {
   const parsedFollow = followActivitySchema.safeParse(activity);
   if (!parsedFollow.success) {
     logger.info(
@@ -65,20 +63,13 @@ export const follow: InboxFunction = async (activity, options) => {
     // 自ホストのユーザーなら秘密鍵を持っているはずなので、異常な動作
     return json({}, 503);
   }
-  const follower = await findOrFetchUserByActorId(parsedFollow.data.actor);
-  if (!follower) {
-    logger.info(
-      "フォローリクエストで指定されたフォロワーの有効なデータが取得できませんでした"
-    );
-    return json({}, 404);
-  }
   try {
     if (options?.undo) {
       await prisma.follow.delete({
         where: {
           followeeId_followerId: {
             followeeId: followee.id,
-            followerId: follower.id,
+            followerId: actorUser.id,
           },
         },
       });
@@ -87,7 +78,7 @@ export const follow: InboxFunction = async (activity, options) => {
       await prisma.follow.create({
         data: {
           followeeId: followee.id,
-          followerId: follower.id,
+          followerId: actorUser.id,
         },
       });
       logger.info("完了: フォロー");
