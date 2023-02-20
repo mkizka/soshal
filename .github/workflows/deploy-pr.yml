@@ -1,0 +1,22 @@
+name: deploy-pr
+
+on:
+  pull_request:
+
+env:
+  APP_NAME: pr${{ github.event.pull_request.number }}-soshal
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ./.github/workflows/base/deploy.yml
+        with:
+          app-name: ${{ envs.APP_NAME }}
+        secrets: inherit
+      - uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: |
+            確認環境が作成されました
+            :rocket: https://${{ envs.APP_NAME }}.mkizka.dev
+          comment_tag: link

@@ -1,15 +1,16 @@
 name: deploy
 
 on:
-  push:
-    branches: main
-  pull_request:
+  workflow_call:
+    inputs:
+      app-name: 
+        type: string
+        required: true
 
 env:
   DOCKER_IMAGE: ghcr.io/mkizka/soshal:pr${{ github.event.pull_request.number }}
   CAPROVER_URL: paas.mkizka.dev
-  APP_NAME: pr${{ github.event.pull_request.number }}-soshal
-  APP_DOMAIN: pr${{ github.event.pull_request.number }}-soshal.mkizka.dev
+  APP_DOMAIN: ${{ inputs.app-name }}.mkizka.dev
 
 jobs:
   build:
@@ -28,28 +29,28 @@ jobs:
           tags: ${{ env.DOCKER_IMAGE }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-      - name: Create new app
+      - name: create-new-app
         continue-on-error: true
         run: |
           npx caprover api \
             -m POST \
             -t /user/apps/appDefinitions/register \
-            -d '{"appName":"${{ env.APP_NAME }}","hasPersistentData":false}' \
+            -d '{"appName":"${{ inputs.app-name }}","hasPersistentData":false}' \
             -u ${{ env.CAPROVER_URL }} \
             -p ${{ secrets.CAPROVER_PASSWORD }}
-      - name: Set custom domain
+      - name: set-custom-domain
         continue-on-error: true
         run: |
           npx caprover api \
             -m POST \
             -t /user/apps/appDefinitions/customdomain \
-            -d '{"appName":"pr1-soshal","customDomain":"${{ env.APP_DOMAIN }}"}' \
+            -d '{"appName":"${{ inputs.app-name }}","customDomain":"${{ env.APP_DOMAIN }}"}' \
             -u ${{ env.CAPROVER_URL }} \
             -p ${{ secrets.CAPROVER_PASSWORD }}
-      - name: Set environment variables
+      - name: update-config
         run: |
           envVars=$(jq -cn \
-            --arg DATABASE_URL "${{ secrets.DATABASE_URL }}/${{ env.APP_NAME }}" \
+            --arg DATABASE_URL "${{ secrets.DATABASE_URL }}/${{ inputs.app-name }}" \
             --arg NEXTAUTH_SECRET "${{ secrets.NEXTAUTH_SECRET }}" \
             --arg NEXTAUTH_URL https://${{ env.APP_DOMAIN }} \
             --arg EMAIL_SERVER_USER "${{ secrets.EMAIL_SERVER_USER }}" \
@@ -59,7 +60,7 @@ jobs:
             --arg EMAIL_FROM mail@test.mkizka.dev \
             '$ARGS.named | to_entries')
           data=$(jq -cn \
-            --arg appName ${{ env.APP_NAME }} \
+            --arg appName ${{ inputs.app-name }} \
             --arg instanceCount 1 \
             --arg containerHttpPort 3000 \
             --argjson envVars "$envVars" \
@@ -70,17 +71,10 @@ jobs:
             -d "$data" \
             -u ${{ env.CAPROVER_URL }} \
             -p ${{ secrets.CAPROVER_PASSWORD }}
-      - name: Deploy app
+      - name: deploy-app
         run: |
           npx caprover deploy \
-            -a ${{ env.APP_NAME }} \
+            -a ${{ inputs.app-name }} \
             -i ${{ env.DOCKER_IMAGE }} \
             -u ${{ env.CAPROVER_URL }} \
             -p ${{ secrets.CAPROVER_PASSWORD }}
-      - name: Comment PR
-        uses: thollander/actions-comment-pull-request@v2
-        with:
-          message: |
-            確認環境が作成されました
-            :rocket: https://pr1-soshal.mkizka.dev
-          comment_tag: link

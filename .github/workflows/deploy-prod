@@ -1,0 +1,13 @@
+name: deploy-prod
+
+on:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ./.github/workflows/base/deploy.yml
+        with:
+          app-name: soshal
+        secrets: inherit
