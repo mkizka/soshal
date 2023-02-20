@@ -8,6 +8,7 @@ jobs:
     uses: ./.github/workflows/_test.yml
   deploy:
     uses: ./.github/workflows/_deploy.yml
+    needs: test
     with:
-      app-name: ${{ env.APP_NAME }}
+      app-name: soshal
     secrets: inherit
