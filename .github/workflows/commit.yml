@@ -12,6 +12,6 @@ jobs:
     uses: ./.github/workflows/_deploy.yml
     needs: test-prod
     with:
-      name: soshal
-      tag: latest
+      app-name: soshal
+      docker-name: soshal:latest
     secrets: inherit

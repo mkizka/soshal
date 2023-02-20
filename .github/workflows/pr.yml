@@ -10,6 +10,6 @@ jobs:
     uses: ./.github/workflows/_deploy.yml
     needs: test-pr
     with:
-      name: pr${{ github.event.pull_request.number }}-soshal
-      tag: pr${{ github.event.pull_request.number }}
+      app-name: pr${{ github.event.pull_request.number }}-soshal
+      docker-name: soshal:pr${{ github.event.pull_request.number }}
     secrets: inherit

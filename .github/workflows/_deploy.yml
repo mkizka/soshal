@@ -3,17 +3,17 @@ name: deploy
 on:
   workflow_call:
     inputs:
-      name: 
+      app-name: 
         type: string
         required: true
-      tag:
+      docker-name:
         type: string
         required: true
 
 env:
-  DOCKER_IMAGE: ghcr.io/mkizka/${{ inputs.name }}:${{ inputs.tag }}
+  DOCKER_IMAGE: ghcr.io/mkizka/${{ inputs.docker-name }}
   CAPROVER_URL: paas.mkizka.dev
-  APP_DOMAIN: ${{ inputs.name }}.mkizka.dev
+  APP_DOMAIN: ${{ inputs.app-name }}.mkizka.dev
 
 jobs:
   deploy:
@@ -38,7 +38,7 @@ jobs:
           npx caprover api \
             -m POST \
             -t /user/apps/appDefinitions/register \
-            -d '{"appName":"${{ inputs.name }}","hasPersistentData":false}' \
+            -d '{"appName":"${{ inputs.app-name }}","hasPersistentData":false}' \
             -u ${{ env.CAPROVER_URL }} \
             -p ${{ secrets.CAPROVER_PASSWORD }}
       - name: set-custom-domain
@@ -47,13 +47,13 @@ jobs:
           npx caprover api \
             -m POST \
             -t /user/apps/appDefinitions/customdomain \
-            -d '{"appName":"${{ inputs.name }}","customDomain":"${{ env.APP_DOMAIN }}"}' \
+            -d '{"appName":"${{ inputs.app-name }}","customDomain":"${{ env.APP_DOMAIN }}"}' \
             -u ${{ env.CAPROVER_URL }} \
             -p ${{ secrets.CAPROVER_PASSWORD }}
       - name: update-config
         run: |
           envVars=$(jq -cn \
-            --arg DATABASE_URL "${{ secrets.DATABASE_URL }}/${{ inputs.name }}" \
+            --arg DATABASE_URL "${{ secrets.DATABASE_URL }}/${{ inputs.app-name }}" \
             --arg NEXTAUTH_SECRET "${{ secrets.NEXTAUTH_SECRET }}" \
             --arg NEXTAUTH_URL https://${{ env.APP_DOMAIN }} \
             --arg EMAIL_SERVER_USER "${{ secrets.EMAIL_SERVER_USER }}" \
@@ -63,7 +63,7 @@ jobs:
             --arg EMAIL_FROM mail@test.mkizka.dev \
             '$ARGS.named | to_entries')
           data=$(jq -cn \
-            --arg appName ${{ inputs.name }} \
+            --arg appName ${{ inputs.app-name }} \
             --arg instanceCount 1 \
             --arg containerHttpPort 3000 \
             --argjson envVars "$envVars" \
@@ -77,7 +77,7 @@ jobs:
       - name: deploy-app
         run: |
           npx caprover deploy \
-            -a ${{ inputs.name }} \
+            -a ${{ inputs.app-name }} \
             -i ${{ env.DOCKER_IMAGE }} \
             -u ${{ env.CAPROVER_URL }} \
             -p ${{ secrets.CAPROVER_PASSWORD }}
