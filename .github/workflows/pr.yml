@@ -1,4 +1,4 @@
-name: deploy-pr
+name: pr
 
 on:
   pull_request:
@@ -7,13 +7,16 @@ env:
   APP_NAME: pr${{ github.event.pull_request.number }}-soshal
 
 jobs:
-  build:
+  test:
+    uses: ./.github/workflows/actions/test.yml
+  deploy:
+    uses: ./.github/workflows/actions/deploy.yml
+    with:
+      app-name: ${{ env.APP_NAME }}
+    secrets: inherit
+  comment:
     runs-on: ubuntu-latest
     steps:
-      - uses: ./.github/workflows/base/deploy.yml
-        with:
-          app-name: ${{ env.APP_NAME }}
-        secrets: inherit
       - uses: thollander/actions-comment-pull-request@v2
         with:
           message: |
