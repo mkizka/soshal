@@ -1,0 +1,15 @@
+name: commit
+
+on:
+  pull_request:
+
+jobs:
+  test-prod:
+    uses: ./.github/workflows/_test.yml
+  deploy-prod:
+    uses: ./.github/workflows/_deploy.yml
+    needs: test-prod
+    with:
+      name: soshal
+      tag: latest
+    secrets: inherit

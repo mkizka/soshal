@@ -1,0 +1,15 @@
+name: pr
+
+on:
+  pull_request:
+
+jobs:
+  test-pr:
+    uses: ./.github/workflows/_test.yml
+  deploy-pr:
+    uses: ./.github/workflows/_deploy.yml
+    needs: test-pr
+    with:
+      name: pr${{ github.event.pull_request.number }}-soshal
+      tag: pr${{ github.event.pull_request.number }}
+    secrets: inherit
