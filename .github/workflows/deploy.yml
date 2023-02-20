@@ -26,9 +26,8 @@ jobs:
         with:
           push: true
           tags: ${{ env.DOCKER_IMAGE }}
-          platforms: linux/amd64
-          cache-from: type=registry,ref=${{ env.DOCKER_IMAGE }}
-          cache-to: type=registry,ref=${{ env.DOCKER_IMAGE }},mode=max
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
       - name: Create new app
         continue-on-error: true
         run: |
