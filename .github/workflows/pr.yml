@@ -3,9 +3,6 @@ name: pr
 on:
   pull_request:
 
-env:
-  PR: pr${{ github.event.pull_request.number }}
-
 jobs:
   test-pr:
     uses: ./.github/workflows/_test.yml
@@ -13,6 +10,6 @@ jobs:
     uses: ./.github/workflows/_deploy.yml
     needs: test-pr
     with:
-      name: ${{ env.PR }}-soshal
-      tag: ${{ env.PR }}
+      name: pr${{ github.event.pull_request.number }}-soshal
+      tag: pr${{ github.event.pull_request.number }}
     secrets: inherit
