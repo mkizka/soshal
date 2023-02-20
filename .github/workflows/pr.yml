@@ -8,9 +8,9 @@ env:
 
 jobs:
   test:
-    uses: ./.github/workflows/actions/test.yml
+    uses: ./.github/workflows/_test.yml
   deploy:
-    uses: ./.github/workflows/actions/deploy.yml
+    uses: ./.github/workflows/_deploy.yml
     with:
       app-name: ${{ env.APP_NAME }}
     secrets: inherit
