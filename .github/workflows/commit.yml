@@ -4,11 +4,12 @@ on:
   pull_request:
 
 jobs:
-  test:
+  test-prod:
     uses: ./.github/workflows/_test.yml
-  deploy:
+  deploy-prod:
     uses: ./.github/workflows/_deploy.yml
     needs: test
     with:
-      app-name: soshal
+      name: soshal
+      tag: latest
     secrets: inherit
