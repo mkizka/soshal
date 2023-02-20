@@ -8,7 +8,7 @@ jobs:
     uses: ./.github/workflows/_test.yml
   deploy-prod:
     uses: ./.github/workflows/_deploy.yml
-    needs: test
+    needs: test-prod
     with:
       name: soshal
       tag: latest

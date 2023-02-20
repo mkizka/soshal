@@ -3,14 +3,15 @@ name: pr
 on:
   pull_request:
 
+env:
+  PR: pr${{ github.event.pull_request.number }}
+
 jobs:
   test-pr:
     uses: ./.github/workflows/_test.yml
   deploy-pr:
     uses: ./.github/workflows/_deploy.yml
     needs: test-pr
-    env:
-      PR: pr${{ github.event.pull_request.number }}
     with:
       name: ${{ env.PR }}-soshal
       tag: ${{ env.PR }}
