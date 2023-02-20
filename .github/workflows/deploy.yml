@@ -77,3 +77,10 @@ jobs:
             -i ${{ env.DOCKER_IMAGE }} \
             -u ${{ env.CAPROVER_URL }} \
             -p ${{ secrets.CAPROVER_PASSWORD }}
+      - name: Comment PR
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: |
+            確認環境が作成されました
+            :rocket: https://pr1-soshal.mkizka.dev
+          comment_tag: link
