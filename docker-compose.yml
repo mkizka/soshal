@@ -2,6 +2,7 @@ version: "3"
 
 volumes:
   db_data:
+  mail_data:
 
 services:
   db:
@@ -12,3 +13,8 @@ services:
       - db_data:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=password
+  mail:
+    image: mailhog/mailhog
+    ports:
+      - 1025:1025
+      - 8025:8025
