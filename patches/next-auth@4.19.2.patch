@@ -1,0 +1,110 @@
+diff --git a/core/lib/email/getUserFromEmail.d.ts b/core/lib/email/getUserFromEmail.d.ts
+index 846c3b41291894d5b0f89d7cbc407c9c1e4b8773..9ac9248bd09c640d785cf211a3c2fdb1f9cf0218 100644
+--- a/core/lib/email/getUserFromEmail.d.ts
++++ b/core/lib/email/getUserFromEmail.d.ts
+@@ -4,7 +4,8 @@ import type { InternalOptions } from "../../types";
+  * Query the database for a user by email address.
+  * If is an existing user return a user object (otherwise use placeholder).
+  */
+-export default function getAdapterUserFromEmail({ email, adapter, }: {
++export default function getAdapterUserFromEmail({ email, query, adapter, }: {
+     email: string;
++    query: Record<string, any>;
+     adapter: InternalOptions<"email">["adapter"];
+ }): Promise<AdapterUser>;
+diff --git a/core/lib/email/getUserFromEmail.js b/core/lib/email/getUserFromEmail.js
+index 0b39d12b1ed0b58019a0beae1d703050a6d2a402..d1b23f62a86beb941dc81f84d52a1d4765405993 100644
+--- a/core/lib/email/getUserFromEmail.js
++++ b/core/lib/email/getUserFromEmail.js
+@@ -7,6 +7,7 @@ exports.default = getAdapterUserFromEmail;
+ 
+ async function getAdapterUserFromEmail({
+   email,
++  query,
+   adapter
+ }) {
+   const {
+@@ -14,7 +15,7 @@ async function getAdapterUserFromEmail({
+   } = adapter;
+   const adapterUser = email ? await getUserByEmail(email) : null;
+   if (adapterUser) return adapterUser;
+-  return {
++  return { ...query,
+     id: email,
+     email,
+     emailVerified: null
+diff --git a/core/lib/email/signin.d.ts b/core/lib/email/signin.d.ts
+index 07fd6bc963645eee593335dc4cd7061f2b59e106..b8053e705b1581e2ab80f6c8bbb86c88cca4dfb6 100644
+--- a/core/lib/email/signin.d.ts
++++ b/core/lib/email/signin.d.ts
+@@ -1,6 +1,7 @@
+ import type { InternalOptions } from "../../types";
++import { RequestInternal } from "../../";
+ /**
+  * Starts an e-mail login flow, by generating a token,
+  * and sending it to the user's e-mail (with the help of a DB adapter)
+  */
+-export default function email(identifier: string, options: InternalOptions<"email">): Promise<string>;
++export default function email(identifier: string, query: RequestInternal["query"], options: InternalOptions<"email">): Promise<string>;
+diff --git a/core/lib/email/signin.js b/core/lib/email/signin.js
+index eda015f645511a8e8f4d8a0ff2b1f84211000dce..42a9828c730711e23dde3169976b73e86cf29bb0 100644
+--- a/core/lib/email/signin.js
++++ b/core/lib/email/signin.js
+@@ -9,7 +9,7 @@ var _crypto = require("crypto");
+ 
+ var _utils = require("../utils");
+ 
+-async function email(identifier, options) {
++async function email(identifier, query, options) {
+   var _await$provider$gener, _provider$generateVer, _provider$maxAge;
+ 
+   const {
+@@ -22,7 +22,7 @@ async function email(identifier, options) {
+   const token = (_await$provider$gener = await ((_provider$generateVer = provider.generateVerificationToken) === null || _provider$generateVer === void 0 ? void 0 : _provider$generateVer.call(provider))) !== null && _await$provider$gener !== void 0 ? _await$provider$gener : (0, _crypto.randomBytes)(32).toString("hex");
+   const ONE_DAY_IN_SECONDS = 86400;
+   const expires = new Date(Date.now() + ((_provider$maxAge = provider.maxAge) !== null && _provider$maxAge !== void 0 ? _provider$maxAge : ONE_DAY_IN_SECONDS) * 1000);
+-  const params = new URLSearchParams({
++  const params = new URLSearchParams({ ...query,
+     callbackUrl,
+     token,
+     email: identifier
+diff --git a/core/routes/callback.js b/core/routes/callback.js
+index 2696b2d8134bb5bd4abc4f009fb438eb65afcfb6..d022c95c222c845d8bf7b66898ef793ba1307f7b 100644
+--- a/core/routes/callback.js
++++ b/core/routes/callback.js
+@@ -217,8 +217,12 @@ async function callback(params) {
+     try {
+       var _events$signIn2;
+ 
+-      const token = query === null || query === void 0 ? void 0 : query.token;
+-      const identifier = query === null || query === void 0 ? void 0 : query.email;
++      const {
++        token,
++        email: identifier,
++        callbackUrl: _,
++        ...newUserQuery
++      } = query;
+ 
+       if (!token || !identifier) {
+         return {
+@@ -242,6 +246,7 @@ async function callback(params) {
+ 
+       const profile = await (0, _getUserFromEmail.default)({
+         email: identifier,
++        query: newUserQuery,
+         adapter
+       });
+       const account = {
+diff --git a/core/routes/signin.js b/core/routes/signin.js
+index f86e99e7316ed7f1f055056eb340ba8b9209b41d..1cbedd4fb4db16e04ac7e7ba9cb0cbc641af972e 100644
+--- a/core/routes/signin.js
++++ b/core/routes/signin.js
+@@ -112,7 +112,7 @@ async function signin(params) {
+     }
+ 
+     try {
+-      const redirect = await (0, _signin.default)(email, options);
++      const redirect = await (0, _signin.default)(email, query, options);
+       return {
+         redirect
+       };
