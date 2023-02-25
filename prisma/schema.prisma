@@ -16,24 +16,6 @@ model Example {
   updatedAt DateTime @updatedAt
 }
 
-model Account {
-  id                String  @id @default(nanoid(8))
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String? @db.Text
-  session_state     String?
-  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([provider, providerAccountId])
-}
-
 model Session {
   id           String   @id @default(nanoid(8))
   sessionToken String   @unique
@@ -43,18 +25,20 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(nanoid(8))
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  accounts      Account[]
-  sessions      Session[]
-  publicKey     String?
-  privateKey    String?
-  notes         Note[]
-  followee      Follow[]  @relation("followee")
-  follower      Follow[]  @relation("follower")
+  id                String    @id @default(nanoid(8))
+  preferredUsername String
+  name              String?
+  host              String?
+  email             String?   @unique
+  emailVerified     DateTime?
+  icon              String?
+  image             String?
+  publicKey         String?
+  privateKey        String?
+  sessions          Session[]
+  notes             Note[]
+  followee          Follow[]  @relation("followee")
+  follower          Follow[]  @relation("follower")
 }
 
 model VerificationToken {
@@ -80,5 +64,6 @@ model Follow {
   followerId String
   follower   User     @relation("follower", fields: [followerId], references: [id], onDelete: Cascade)
   createdAt  DateTime @default(now())
+
   @@unique([followeeId, followerId])
 }
