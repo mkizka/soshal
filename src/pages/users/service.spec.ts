@@ -5,10 +5,13 @@ import { findOrFetchUserById } from "./service";
 
 const dummyUser: User = {
   id: "dummyId",
-  name: "dummy",
+  name: "Dummy",
+  preferredUsername: "dummy",
+  host: "myhost.example.com",
   email: null,
   emailVerified: null,
   image: null,
+  icon: null,
   publicKey: null,
   privateKey: null,
 };

@@ -1,3 +1,4 @@
+import type { User } from "@prisma/client";
 import { json } from "next-runtime";
 import { findOrFetchUserByActorId } from "../../../../utils/findOrFetchUser";
 import { verifyActivity } from "../../../../utils/httpSignature/verify";
@@ -14,12 +15,15 @@ const mockedFindOrFetchUserByActorId = jest.mocked(findOrFetchUserByActorId);
 jest.mock("../../../../utils/httpSignature/verify");
 const mockedVerifyActivity = jest.mocked(verifyActivity);
 
-const dummyRemoteUser = {
+const dummyRemoteUser: User = {
   id: "dummyidremote",
-  name: "dummy_remote",
+  name: "dummyRemote",
+  preferredUsername: "dummy_remote",
+  host: "remote.example.com",
   email: null,
   emailVerified: null,
   image: null,
+  icon: null,
   publicKey: null,
   privateKey: null,
 };

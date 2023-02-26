@@ -1,4 +1,5 @@
 import { Matcher } from "jest-mock-extended";
+import type { User } from "@prisma/client";
 import { logger } from "../../../../utils/logger";
 import { prismaMock } from "../../../../__mocks__/db";
 import { queue } from "../../../../server/background/queue";
@@ -17,22 +18,28 @@ const mockedLogger = jest.mocked(logger);
 jest.mock("../../../../server/background/queue");
 const mockedQueue = jest.mocked(queue);
 
-const dummyLocalUser = {
+const dummyLocalUser: User = {
   id: "dummyidlocal",
-  name: "dummy_local",
+  preferredUsername: "dummy_local",
+  host: "myhost.example.com",
+  name: "dummyLocal",
   email: null,
   emailVerified: null,
   image: null,
+  icon: null,
   publicKey: null,
   privateKey: "privateKey",
 };
 
-const dummyRemoteUser = {
+const dummyRemoteUser: User = {
   id: "dummyidremote",
-  name: "dummy_remote",
+  name: "dummyRemote",
+  preferredUsername: "dummy_remote",
+  host: "remote.example.com",
   email: null,
   emailVerified: null,
   image: null,
+  icon: null,
   publicKey: null,
   privateKey: null,
 };

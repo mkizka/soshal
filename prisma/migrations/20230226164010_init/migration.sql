@@ -21,8 +21,8 @@ CREATE TABLE "Session" (
 CREATE TABLE "User" (
     "id" TEXT NOT NULL,
     "preferredUsername" TEXT NOT NULL,
+    "host" TEXT NOT NULL,
     "name" TEXT,
-    "host" TEXT,
     "email" TEXT,
     "emailVerified" TIMESTAMP(3),
     "icon" TEXT,
@@ -65,6 +65,9 @@ CREATE UNIQUE INDEX "Session_sessionToken_key" ON "Session"("sessionToken");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_preferredUsername_host_key" ON "User"("preferredUsername", "host");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "VerificationToken_token_key" ON "VerificationToken"("token");

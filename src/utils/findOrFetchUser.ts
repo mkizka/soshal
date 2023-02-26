@@ -34,6 +34,7 @@ const fetchActorIdByWebFinger = async (name: string, host: string) => {
 };
 
 const personSchema = z.object({
+  name: z.string().nullable().default(null),
   preferredUsername: z.string().min(1),
   icon: z
     .object({
@@ -68,8 +69,8 @@ export const findOrFetchUserByActorId = async (actorId: URL) => {
   }
   const existingUser = await prisma.user.findFirst({
     where: {
-      // TODO: hostも合わせて調べる
-      name: person.preferredUsername,
+      preferredUsername: person.preferredUsername,
+      host: actorId.host,
     },
   });
   if (existingUser) {
@@ -77,8 +78,11 @@ export const findOrFetchUserByActorId = async (actorId: URL) => {
   }
   return prisma.user.create({
     data: {
-      name: person.preferredUsername,
-      image: person.icon.url,
+      name: person.name,
+      preferredUsername: person.preferredUsername,
+      host: env.HOST,
+      //image: person.image.url,
+      //icon: person.icon.url,
       publicKey: person.publicKey.publicKeyPem,
     },
   });

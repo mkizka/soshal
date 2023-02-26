@@ -1,16 +1,33 @@
 import type { User } from "@prisma/client";
+import { AP } from "activitypub-core-types";
 import nock from "nock";
 import { prismaMock } from "../__mocks__/db";
 import { findOrFetchUserByWebfinger } from "./findOrFetchUser";
 
 const dummyUser: User = {
   id: "dummyId",
-  name: "dummy",
+  name: "Dummy",
+  preferredUsername: "dummy",
+  host: "remote.example.com",
   email: null,
   emailVerified: null,
   image: null,
+  icon: null,
   publicKey: null,
   privateKey: null,
+};
+
+const dummyPerson: AP.Person = {
+  type: "Person",
+  name: "Dummy",
+  preferredUsername: "dummy",
+  inbox: new URL("https://remote.example.com/u/dummyId/inbox"),
+  outbox: new URL("https://remote.example.com/u/dummyId/outbox"),
+  publicKey: {
+    id: "https://remote.example.com/u/dummyId#main-key",
+    owner: "https://remote.example.com/u/dummyId",
+    publicKeyPem: "publicKey",
+  },
 };
 
 jest.mock("../utils/env", () => ({
@@ -74,7 +91,7 @@ describe("findOrFetchUser", () => {
         });
       const remoteUserScope = nock("https://remote.example.com")
         .get("/users/dummyId")
-        .reply(200, { preferredUsername: "dummy" });
+        .reply(200, dummyPerson);
       prismaMock.user.findFirst.mockResolvedValue(null);
       prismaMock.user.create.mockResolvedValue(dummyUser);
       // act
@@ -85,16 +102,17 @@ describe("findOrFetchUser", () => {
       // assert
       expect(prismaMock.user.create).toHaveBeenCalledWith({
         data: {
-          name: "dummy",
-          image: "",
-          publicKey: "",
+          name: "Dummy",
+          host: "myhost.example.com",
+          preferredUsername: "dummy",
+          publicKey: "publicKey",
         },
       });
       expect(webFingerScope.isDone()).toBe(true);
       expect(remoteUserScope.isDone()).toBe(true);
       expect(user).toEqual(dummyUser);
     });
-    test("WebFingerを叩いて既存ユーザーなら保存する", async () => {
+    test("WebFingerを叩いて既存ユーザーならそのまま返す", async () => {
       // arrange
       const webFingerScope = nock("https://remote.example.com")
         .get("/.well-known/webfinger")
@@ -108,7 +126,7 @@ describe("findOrFetchUser", () => {
         });
       const remoteUserScope = nock("https://remote.example.com")
         .get("/users/dummyId")
-        .reply(200, { preferredUsername: "dummy" });
+        .reply(200, dummyPerson);
       prismaMock.user.findFirst.mockResolvedValue(dummyUser);
       // act
       const user = await findOrFetchUserByWebfinger(
@@ -118,7 +136,8 @@ describe("findOrFetchUser", () => {
       // assert
       expect(prismaMock.user.findFirst).toHaveBeenCalledWith({
         where: {
-          name: "dummy",
+          preferredUsername: "dummy",
+          host: "remote.example.com",
         },
       });
       expect(webFingerScope.isDone()).toBe(true);
