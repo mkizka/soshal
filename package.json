@@ -6,6 +6,7 @@
     "build": "next build",
     "dev": "next dev",
     "test": "jest",
+    "e2e": "playwright test e2e",
     "postinstall": "prisma generate",
     "lint": "next lint",
     "start": "next start"
@@ -30,6 +31,7 @@
     "zod": "^3.20.2"
   },
   "devDependencies": {
+    "@playwright/test": "^1.31.1",
     "@types/jest": "^29.2.6",
     "@types/node": "^18.11.18",
     "@types/react": "^18.0.26",
