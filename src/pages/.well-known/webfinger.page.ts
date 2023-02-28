@@ -20,11 +20,11 @@ export const getServerSideProps: GetServerSideProps = async ({
   ) {
     return { notFound: true };
   }
-  const name = query.resource
+  const preferredUsername = query.resource
     .replace("acct:", "") // startsWithされてるので必ず先頭にある
     .split("@")[0]; // endsWithされてるので必ず1文字以上ある
   const user = await prisma.user.findFirst({
-    where: { name },
+    where: { preferredUsername },
   });
   if (!user) {
     return { notFound: true };
