@@ -25,8 +25,8 @@ const convertUser = (
     following: new URL(`${userAddress}/following`),
     followers: new URL(`${userAddress}/followers`),
     featured: new URL(`${userAddress}/collections/featured`),
-    preferredUsername: required(user.name),
-    name: required(user.name),
+    preferredUsername: user.preferredUsername,
+    name: user.name || "",
     url: new URL(userAddress),
     publicKey: {
       id: userAddress,

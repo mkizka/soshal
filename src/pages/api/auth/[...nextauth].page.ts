@@ -7,7 +7,9 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
  
 import { prisma } from "../../../server/db";
 import { env } from "../../../utils/env";
+import { Adapter } from "next-auth/adapters";
 
+ 
 export const authOptions: NextAuthOptions = {
   // Include user.id on session
   callbacks: {
@@ -46,7 +48,19 @@ export const authOptions: NextAuthOptions = {
       });
     },
   },
-  adapter: PrismaAdapter(prisma),
+  adapter: {
+    ...PrismaAdapter(prisma),
+    createUser: (data) =>
+      // 謎の型エラー
+      // @ts-ignore
+      prisma.user.create({
+        // @ts-ignore
+        data: {
+          ...data,
+          host: env.HOST,
+        },
+      }),
+  },
   providers: [
     EmailProvider({
       server: {

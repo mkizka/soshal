@@ -56,7 +56,7 @@ const AddNote = () => {
     },
   });
   const ref = useRef<HTMLInputElement>(null);
-  const { data: notes } = api.example.getAllNotes.useQuery();
+  const { data: notes } = api.note.findSelf.useQuery();
   const handleClick = () => {
     const { value: text } = ref.current || {};
     if (text) {
@@ -93,6 +93,21 @@ const Followers = () => {
   );
 };
 
+const Timeline = () => {
+  const { data: notes } = api.note.find.useQuery();
+  return (
+    <div>
+      <h3>タイムライン</h3>
+      {notes &&
+        notes.map((note) => (
+          <p key={note.id}>
+            {note.user.preferredUsername}@{note.user.host}: {note.content}
+          </p>
+        ))}
+    </div>
+  );
+};
+
 const PlayGround = () => {
   return (
     <div>
@@ -100,6 +115,7 @@ const PlayGround = () => {
       <ResetMe />
       <AddNote />
       <Followers />
+      <Timeline />
     </div>
   );
 };

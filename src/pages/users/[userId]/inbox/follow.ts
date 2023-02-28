@@ -3,6 +3,7 @@ import { z } from "zod";
 import { queue } from "../../../../server/background/queue";
 import { prisma } from "../../../../server/db";
 import { env } from "../../../../utils/env";
+import { formatZodError } from "../../../../utils/formatZodError";
 import { logger } from "../../../../utils/logger";
 import type { InboxFunction } from "./types";
 
@@ -36,9 +37,8 @@ const resolveUserId = (actorId: URL) => {
 export const follow: InboxFunction = async (activity, actorUser, options) => {
   const parsedFollow = followActivitySchema.safeParse(activity);
   if (!parsedFollow.success) {
-    logger.info(
-      // TODO: envディレクトリをts化してformatErrorsを切り出す
-      "検証失敗: " + parsedFollow.error.issues[0]?.message
+    logger.info( 
+      "検証失敗: " + formatZodError(parsedFollow.error)
     );
     return json({}, 400);
   }

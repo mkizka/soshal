@@ -53,9 +53,11 @@ model VerificationToken {
 
 model Note {
   id        String   @id @default(nanoid(8))
+  url       String?
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   content   String
+  published DateTime
   createdAt DateTime @default(now())
 }
 

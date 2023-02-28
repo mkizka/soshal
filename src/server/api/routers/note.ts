@@ -4,10 +4,29 @@ import { activityStreams } from "../../../utils/activitypub";
 import { logger } from "../../../utils/logger";
 import { prisma } from "../../db";
 import { queue } from "../../background/queue";
-import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { env } from "../../../utils/env";
 
 export const noteRouter = createTRPCRouter({
+  find: publicProcedure.query(({ ctx }) => {
+    return ctx.prisma.note.findMany({
+      include: {
+        user: {
+          select: {
+            preferredUsername: true,
+            host: true,
+          },
+        },
+      },
+    });
+  }),
+  findSelf: protectedProcedure.query(({ ctx }) => {
+    return ctx.prisma.note.findMany({
+      where: {
+        userId: ctx.session.user.id,
+      },
+    });
+  }),
   create: protectedProcedure
     .input(z.object({ text: z.string() }))
     .mutation(async ({ input, ctx }) => {
@@ -15,6 +34,7 @@ export const noteRouter = createTRPCRouter({
         data: {
           userId: ctx.session.user.id,
           content: input.text,
+          published: new Date(),
         },
       });
       const user = await prisma.user.findFirst({
@@ -50,6 +70,7 @@ export const noteRouter = createTRPCRouter({
         );
         return;
       }
+      // TODO: 自分のじゃなかったらエラー吐く
       queue.push({
         runner: "relayActivity",
         params: {

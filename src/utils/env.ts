@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { logger } from "./logger";
+import { formatZodError } from "./formatZodError";
 
 const serverEnvSchema = z.object({
   DATABASE_URL: z.string().url(),
@@ -24,11 +24,10 @@ let env = process.env as unknown as z.infer<typeof serverEnvSchema>;
 if (!process.env.SKIP_ENV_VALIDATION) {
   const parsed = serverEnvSchema.safeParse(process.env);
   if (parsed.success === false) {
-    logger.error(
-      "❌ Invalid environment variables:",
-      parsed.error.flatten().fieldErrors
+    parsed.error.format();
+    throw new Error(
+      `❌ Invalid environment variables: ${formatZodError(parsed.error)}`
     );
-    throw new Error("Invalid environment variables");
   }
   env = parsed.data;
 }
