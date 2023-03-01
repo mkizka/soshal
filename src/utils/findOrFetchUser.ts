@@ -13,13 +13,19 @@ const resolveWebFingerResponse = (data: object) => {
   return safeUrl(href);
 };
 
-const fetchActorIdByWebFinger = async (name: string, host: string) => {
+const fetchActorIdByWebFinger = async (
+  preferredUsername: string,
+  host: string
+) => {
   const remoteUrl = safeUrl(`https://${host}`);
   if (!remoteUrl) {
     return null;
   }
   const webFingerUrl = new URL("/.well-known/webfinger", remoteUrl);
-  webFingerUrl.searchParams.append("resource", `acct:${name}@${host}`);
+  webFingerUrl.searchParams.append(
+    "resource",
+    `acct:${preferredUsername}@${host}`
+  );
   const response = await fetchJson(webFingerUrl);
   if (!response) {
     return null;
@@ -27,7 +33,7 @@ const fetchActorIdByWebFinger = async (name: string, host: string) => {
   const actorId = resolveWebFingerResponse(response.body);
   if (!actorId) {
     logger.warn(
-      `${name}@${host} のWebFingerから有効な値が取得できませんでした`
+      `${preferredUsername}@${host} のWebFingerから有効な値が取得できませんでした`
     );
   }
   return actorId;
@@ -89,14 +95,14 @@ export const findOrFetchUserByActorId = async (actorId: URL) => {
 };
 
 export const findOrFetchUserByWebfinger = async (
-  name: string,
+  preferredUsername: string,
   host?: string
 ) => {
   // hostが無いかenv.HOSTと一致するなら自サーバーのユーザー
   if (host == undefined || host == env.HOST) {
-    return await prisma.user.findFirst({ where: { name } });
+    return await prisma.user.findFirst({ where: { preferredUsername } });
   }
-  const actorId = await fetchActorIdByWebFinger(name, host);
+  const actorId = await fetchActorIdByWebFinger(preferredUsername, host);
   if (!actorId) {
     return null;
   }

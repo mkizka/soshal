@@ -46,7 +46,7 @@ describe("findOrFetchUser", () => {
       const user = await findOrFetchUserByWebfinger("dummy");
       // assert
       expect(prismaMock.user.findFirst).toHaveBeenCalledWith({
-        where: { name: "dummy" },
+        where: { preferredUsername: "dummy" },
       });
       expect(user).toEqual(dummyUser);
     });
@@ -60,7 +60,7 @@ describe("findOrFetchUser", () => {
       );
       // assert
       expect(prismaMock.user.findFirst).toHaveBeenCalledWith({
-        where: { name: "dummy" },
+        where: { preferredUsername: "dummy" },
       });
       expect(user).toEqual(dummyUser);
     });
@@ -71,7 +71,7 @@ describe("findOrFetchUser", () => {
       const user = await findOrFetchUserByWebfinger("dummy");
       // assert
       expect(prismaMock.user.findFirst).toHaveBeenCalledWith({
-        where: { name: "dummy" },
+        where: { preferredUsername: "dummy" },
       });
       expect(user).toBeNull();
     });
