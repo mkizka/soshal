@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "next build",
-    "dev": "next dev",
+    "dev": "docker compose up -d && next dev",
     "test": "jest",
     "e2e": "playwright test e2e",
     "postinstall": "prisma generate",

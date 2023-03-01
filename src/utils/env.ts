@@ -24,7 +24,6 @@ let env = process.env as unknown as z.infer<typeof serverEnvSchema>;
 if (!process.env.SKIP_ENV_VALIDATION) {
   const parsed = serverEnvSchema.safeParse(process.env);
   if (parsed.success === false) {
-    parsed.error.format();
     throw new Error(
       `❌ Invalid environment variables: ${formatZodError(parsed.error)}`
     );
