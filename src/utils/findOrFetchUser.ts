@@ -40,8 +40,10 @@ const fetchActorIdByWebFinger = async (
 };
 
 const personSchema = z.object({
+  id: z.string().url(),
   name: z.string().nullable().default(null),
   preferredUsername: z.string().min(1),
+  inbox: z.string().url(),
   icon: z
     .object({
       url: z.string().default(""),
@@ -89,6 +91,8 @@ export const findOrFetchUserByActorId = async (actorId: URL) => {
       host: actorId.host,
       //image: person.image.url,
       //icon: person.icon.url,
+      actorUrl: person.id,
+      inboxUrl: person.inbox,
       publicKey: person.publicKey.publicKeyPem,
     },
   });

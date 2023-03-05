@@ -20,6 +20,7 @@ const dummyUser: User = {
 };
 
 const dummyPerson: AP.Person = {
+  id: new URL("https://remote.example.com/u/dummyId"),
   type: "Person",
   name: "Dummy",
   preferredUsername: "dummy",
@@ -108,6 +109,8 @@ describe("findOrFetchUser", () => {
           host: "remote.example.com",
           preferredUsername: "dummy",
           publicKey: "publicKey",
+          actorUrl: "https://remote.example.com/u/dummyId",
+          inboxUrl: "https://remote.example.com/u/dummyId/inbox",
         },
       });
       expect(webFingerScope.isDone()).toBe(true);
