@@ -35,6 +35,8 @@ model User {
   image             String?
   publicKey         String?
   privateKey        String?
+  actorUrl          String?
+  inboxUrl          String?
   sessions          Session[]
   notes             Note[]
   followee          Follow[]  @relation("followee")
@@ -53,7 +55,7 @@ model VerificationToken {
 
 model Note {
   id        String   @id @default(nanoid(8))
-  url       String?
+  url       String? // TODO: objectUrlに変える
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   content   String
@@ -61,13 +63,20 @@ model Note {
   createdAt DateTime @default(now())
 }
 
+enum FollowStatus {
+  SENT
+  RECEIVED
+  ACCEPTED
+}
+
 model Follow {
-  id         String   @id @default(nanoid(8))
+  id         String       @id @default(nanoid(8))
+  status     FollowStatus @default(SENT)
   followeeId String
-  followee   User     @relation("followee", fields: [followeeId], references: [id], onDelete: Cascade)
+  followee   User         @relation("followee", fields: [followeeId], references: [id], onDelete: Cascade)
   followerId String
-  follower   User     @relation("follower", fields: [followerId], references: [id], onDelete: Cascade)
-  createdAt  DateTime @default(now())
+  follower   User         @relation("follower", fields: [followerId], references: [id], onDelete: Cascade)
+  createdAt  DateTime     @default(now())
 
   @@unique([followeeId, followerId])
 }

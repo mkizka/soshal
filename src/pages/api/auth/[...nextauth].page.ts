@@ -7,15 +7,13 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
  
 import { prisma } from "../../../server/db";
 import { env } from "../../../utils/env";
-import { Adapter } from "next-auth/adapters";
 
- 
 export const authOptions: NextAuthOptions = {
-  // Include user.id on session
   callbacks: {
     async session({ session, user }) {
       if (session.user) {
         session.user.id = user.id;
+        session.user.privateKey = user.privateKey;
       }
       return session;
     },

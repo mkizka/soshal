@@ -1,2 +1,0 @@
--- AlterTable
-ALTER TABLE "Note" ALTER COLUMN "url" DROP NOT NULL;

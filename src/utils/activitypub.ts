@@ -71,10 +71,19 @@ const convertCreate = (note: Note): AP.Create => {
 
 const convertDelete = (note: Pick<Note, "id" | "userId">): AP.Delete => {
   return {
-    "@context": "https://www.w3.org/ns/activitystreams",
+    "@context": new URL("https://www.w3.org/ns/activitystreams"),
     type: "Delete",
     actor: new URL(`https://${env.HOST}/users/${note.userId}`),
     object: new URL(`https://${env.HOST}/notes/${note.id}`),
+  };
+};
+
+const createFollow = (userId: string, followeeUrl: string): AP.Follow => {
+  return {
+    "@context": new URL("https://www.w3.org/ns/activitystreams"),
+    type: "Follow",
+    actor: new URL(`https://${env.HOST}/users/${userId}`),
+    object: new URL(followeeUrl),
   };
 };
 
@@ -83,4 +92,5 @@ export const activityStreams = {
   note: convertNote,
   create: convertCreate,
   delete: convertDelete,
+  follow: createFollow,
 };

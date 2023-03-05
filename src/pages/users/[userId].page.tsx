@@ -1,13 +1,24 @@
-import type { GetServerSideProps } from "next";
+import { User } from "@prisma/client";
+import type { GetServerSideProps, NextPage } from "next";
 import { activityStreams } from "../../utils/activitypub";
+import { api } from "../../utils/api";
 import { findOrFetchUserById } from "./service";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const User = (props: any) => {
+type Props = {
+  user: User;
+};
+
+const User: NextPage<Props> = ({ user }) => {
+  const mutation = api.follow.create.useMutation();
   return (
-    <pre>
-      <code>{props.user}</code>
-    </pre>
+    <div>
+      <p>{user.name}</p>
+      <p>
+        @{user.preferredUsername}
+        {user.host && `@${user.host}`}
+      </p>
+      <button onClick={() => mutation.mutate(user.id)}>フォロー</button>
+    </div>
   );
 };
 
@@ -33,7 +44,8 @@ export const getServerSideProps: GetServerSideProps = async ({
   }
   return {
     props: {
-      user: JSON.stringify(user, null, 2),
+      // TODO: privateKeyが露出しないようにする
+      user,
     },
   };
 };

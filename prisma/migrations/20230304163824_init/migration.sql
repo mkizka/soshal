@@ -1,3 +1,6 @@
+-- CreateEnum
+CREATE TYPE "FollowStatus" AS ENUM ('SENT', 'RECEIVED', 'ACCEPTED');
+
 -- CreateTable
 CREATE TABLE "Example" (
     "id" TEXT NOT NULL,
@@ -29,6 +32,8 @@ CREATE TABLE "User" (
     "image" TEXT,
     "publicKey" TEXT,
     "privateKey" TEXT,
+    "actorUrl" TEXT,
+    "inboxUrl" TEXT,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
@@ -43,8 +48,10 @@ CREATE TABLE "VerificationToken" (
 -- CreateTable
 CREATE TABLE "Note" (
     "id" TEXT NOT NULL,
+    "url" TEXT,
     "userId" TEXT NOT NULL,
     "content" TEXT NOT NULL,
+    "published" TIMESTAMP(3) NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Note_pkey" PRIMARY KEY ("id")
@@ -53,6 +60,7 @@ CREATE TABLE "Note" (
 -- CreateTable
 CREATE TABLE "Follow" (
     "id" TEXT NOT NULL,
+    "status" "FollowStatus" NOT NULL DEFAULT 'SENT',
     "followeeId" TEXT NOT NULL,
     "followerId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,

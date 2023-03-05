@@ -1,5 +1,5 @@
 import type { User } from "@prisma/client";
-import { AP } from "activitypub-core-types";
+import type { AP } from "activitypub-core-types";
 import nock from "nock";
 import { prismaMock } from "../__mocks__/db";
 import { findOrFetchUserByWebfinger } from "./findOrFetchUser";
@@ -15,6 +15,8 @@ const dummyUser: User = {
   icon: null,
   publicKey: null,
   privateKey: null,
+  actorUrl: null,
+  inboxUrl: null,
 };
 
 const dummyPerson: AP.Person = {
