@@ -23,7 +23,7 @@ export const followRouter = createTRPCRouter({
           status: isRemote ? "SENT" : "ACCEPTED",
         },
       });
-      if (!isRemote) {
+      if (isRemote) {
         if (!followee.actorUrl) {
           throw new Error("フォロイーのactorUrlがありません");
         }
