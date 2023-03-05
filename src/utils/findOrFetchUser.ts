@@ -86,7 +86,7 @@ export const findOrFetchUserByActorId = async (actorId: URL) => {
     data: {
       name: person.name,
       preferredUsername: person.preferredUsername,
-      host: env.HOST,
+      host: actorId.host,
       //image: person.image.url,
       //icon: person.icon.url,
       publicKey: person.publicKey.publicKeyPem,

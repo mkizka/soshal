@@ -103,7 +103,7 @@ describe("findOrFetchUser", () => {
       expect(prismaMock.user.create).toHaveBeenCalledWith({
         data: {
           name: "Dummy",
-          host: "myhost.example.com",
+          host: "remote.example.com",
           preferredUsername: "dummy",
           publicKey: "publicKey",
         },
