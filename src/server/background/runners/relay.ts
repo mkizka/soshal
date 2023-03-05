@@ -16,6 +16,7 @@ export const relayActivity = async (params: {
     params.publicKeyId,
     params.privateKey
   );
+  logger.info(`Activity送信: ${JSON.stringify(params.activity)}`);
   const response = await got(inboxUrl, {
     method: "POST",
     json: params.activity,
