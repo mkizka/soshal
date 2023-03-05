@@ -79,7 +79,7 @@ const AuthShowcase: React.FC = () => {
           sessionData
             ? () => signOut()
             : () => {
-                const name = new Date().getTime().toString().slice(0, 6);
+                const name = crypto.randomUUID().split("-")[0]!;
                 signIn(
                   "email",
                   { email: `${name}@example.com` },
