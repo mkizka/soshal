@@ -64,7 +64,7 @@ const AuthShowcase: React.FC = () => {
 
   const { data: secretMessage } = api.example.getSecretMessage.useQuery(
     undefined, // no input
-    { enabled: sessionData?.user !== undefined },
+    { enabled: sessionData?.user !== undefined }
   );
 
   return (
@@ -78,15 +78,17 @@ const AuthShowcase: React.FC = () => {
         onClick={
           sessionData
             ? () => signOut()
-            : () =>
+            : () => {
+                const name = new Date().getTime().toString().slice(0, 6);
                 signIn(
                   "email",
-                  { email: "test@example.com" },
+                  { email: `${name}@example.com` },
                   {
-                    name: "テスト",
-                    preferredUsername: "test",
+                    name: "テスト" + name,
+                    preferredUsername: name,
                   }
-                )
+                );
+              }
         }
       >
         {sessionData ? "Sign out" : "Sign in"}
