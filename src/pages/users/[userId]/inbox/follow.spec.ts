@@ -29,6 +29,8 @@ const dummyLocalUser: User = {
   icon: null,
   publicKey: null,
   privateKey: "privateKey",
+  actorUrl: null,
+  inboxUrl: null,
 };
 
 const dummyRemoteUser: User = {
@@ -42,6 +44,8 @@ const dummyRemoteUser: User = {
   icon: null,
   publicKey: null,
   privateKey: null,
+  actorUrl: null,
+  inboxUrl: null,
 };
 
 export const object = <T>(expectedValue: T) =>

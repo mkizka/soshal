@@ -14,6 +14,8 @@ const dummyUser: User = {
   icon: null,
   publicKey: null,
   privateKey: null,
+  actorUrl: null,
+  inboxUrl: null,
 };
 
 jest.mock("../../utils/findOrFetchUser");

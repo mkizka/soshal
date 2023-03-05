@@ -1,4 +1,4 @@
-import { User } from "@prisma/client";
+import type { User } from "@prisma/client";
 import { logger } from "../../../../utils/logger";
 import { prismaMock } from "../../../../__mocks__/db";
 import { note } from "./note";
@@ -17,6 +17,8 @@ const dummyRemoteUser: User = {
   icon: null,
   publicKey: null,
   privateKey: null,
+  actorUrl: null,
+  inboxUrl: null,
 };
 
 describe("ノート", () => {

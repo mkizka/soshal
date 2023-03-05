@@ -26,6 +26,8 @@ const dummyRemoteUser: User = {
   icon: null,
   publicKey: null,
   privateKey: null,
+  actorUrl: null,
+  inboxUrl: null,
 };
 
 const createMockedActivityContext = (activity: unknown) =>
