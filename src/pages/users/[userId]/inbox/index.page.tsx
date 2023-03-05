@@ -3,6 +3,7 @@ import { z } from "zod";
 import { findOrFetchUserByActorId } from "../../../../utils/findOrFetchUser";
 import { verifyActivity } from "../../../../utils/httpSignature/verify";
 import { logger } from "../../../../utils/logger";
+import { accept } from "./accept";
 import { follow } from "./follow";
 
 const Noop = () => undefined;
@@ -10,6 +11,7 @@ export default Noop;
 
 const inbox = {
   Follow: follow,
+  Accept: accept,
 } as const;
 
 const keysOf = <T extends object>(obj: T) =>
