@@ -16,7 +16,7 @@ export const followRouter = createTRPCRouter({
         return;
       }
       const isRemote = followee.host != env.HOST;
-      await prisma.follow.create({
+      const follow = await prisma.follow.create({
         data: {
           followeeId: followee.id,
           followerId: ctx.session.user.id,
@@ -30,10 +30,7 @@ export const followRouter = createTRPCRouter({
         queue.push({
           runner: "relayActivity",
           params: {
-            activity: activityStreams.follow(
-              ctx.session.user.id,
-              followee.actorUrl
-            ),
+            activity: activityStreams.follow(follow, followee.actorUrl),
             privateKey: ctx.session.user.privateKey,
             // TODO: idだけ渡せばいいようにしたい
             publicKeyId: `https://${env.HOST}/users/${ctx.session.user.id}`,

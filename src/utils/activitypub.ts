@@ -1,4 +1,4 @@
-import type { User, Note } from "@prisma/client";
+import type { User, Note, Follow } from "@prisma/client";
 import type { AP } from "activitypub-core-types";
 import { env } from "./env";
 
@@ -59,6 +59,7 @@ const convertCreate = (note: Note): AP.Create => {
   const object = convertNote(note);
   return {
     "@context": "https://www.w3.org/ns/activitystreams",
+    // TODO: エンドポイントつくる
     id: new URL(`https://${env.HOST}/notes/${note.id}/activity`),
     type: "Create",
     actor: new URL(`https://${env.HOST}/users/${note.userId}`),
@@ -78,11 +79,13 @@ const convertDelete = (note: Pick<Note, "id" | "userId">): AP.Delete => {
   };
 };
 
-const createFollow = (userId: string, followeeUrl: string): AP.Follow => {
+const convertFollow = (follow: Follow, followeeUrl: string): AP.Follow => {
   return {
     "@context": new URL("https://www.w3.org/ns/activitystreams"),
+    // TODO: エンドポイントつくる
+    id: new URL(`https://${env.HOST}/follows/${follow.id}`),
     type: "Follow",
-    actor: new URL(`https://${env.HOST}/users/${userId}`),
+    actor: new URL(`https://${env.HOST}/users/${follow.followerId}`),
     object: new URL(followeeUrl),
   };
 };
@@ -92,5 +95,5 @@ export const activityStreams = {
   note: convertNote,
   create: convertCreate,
   delete: convertDelete,
-  follow: createFollow,
+  follow: convertFollow,
 };
