@@ -1,4 +1,5 @@
 import { GetServerSideProps } from "next";
+import { env } from "../../utils/env";
 
 const Noop = () => undefined;
 export default Noop;
