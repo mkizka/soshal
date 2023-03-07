@@ -6,9 +6,13 @@ import { createMockedContext } from "../../../__mocks__/context";
 import { follow } from "./follow";
 import { getServerSideProps } from "./index.page";
 import { logger } from "../../../../utils/logger";
+import { note } from "./note";
 
 jest.mock("./follow");
 const mockedFollow = jest.mocked(follow).mockResolvedValue(json({}, 200));
+
+jest.mock("./note");
+const mockedNote = jest.mocked(note).mockResolvedValue(json({}, 200));
 
 jest.mock("../../../../utils/findOrFetchUser");
 const mockedFindOrFetchUserByActorId = jest.mocked(findOrFetchUserByActorId);
@@ -97,6 +101,29 @@ describe("ユーザーinbox", () => {
       });
     }
   );
+  test.each`
+    type      | fn
+    ${"Note"} | ${mockedNote}
+  `("Createで$typeを実装した関数が呼ばれる", async ({ type, fn }) => {
+    // arrange
+    const activity = {
+      type: "Create",
+      actor: "https://remote.example.com/u/dummy_remote",
+      object: { type },
+    };
+    const ctx = createMockedActivityContext(activity);
+    mockedFindOrFetchUserByActorId.mockResolvedValue(dummyRemoteUser);
+    mockedVerifyActivity.mockReturnValue({ isValid: true });
+    // act
+    await getServerSideProps(ctx);
+    // assert
+    expect(mockedVerifyActivity).toHaveBeenCalledWith(
+      ctx.resolvedUrl,
+      ctx.req.headers,
+      dummyRemoteUser.publicKey
+    );
+    expect(fn).toBeCalledWith(activity.object, dummyRemoteUser);
+  });
   test("actorのユーザーが取得できなかった場合は400を返す", async () => {
     // arrange
     const activity = {

@@ -5,6 +5,7 @@ import { verifyActivity } from "../../../../utils/httpSignature/verify";
 import { logger } from "../../../../utils/logger";
 import { accept } from "./accept";
 import { follow } from "./follow";
+import { note } from "./note";
 
 const Noop = () => undefined;
 export default Noop;
@@ -16,6 +17,10 @@ const inbox = {
 
 const undoInbox = {
   Follow: follow,
+};
+
+const createInbox = {
+  Note: note,
 };
 
 const keysOf = <T extends object>(obj: T) =>
@@ -35,6 +40,17 @@ const anyActivitySchema = z.union([
       object: z
         .object({
           type: z.enum(keysOf(undoInbox)),
+        })
+        .passthrough(),
+    })
+    .passthrough(),
+  z
+    .object({
+      type: z.literal("Create"),
+      actor: z.string().url(),
+      object: z
+        .object({
+          type: z.enum(keysOf(createInbox)),
         })
         .passthrough(),
     })
@@ -70,6 +86,12 @@ export const getServerSideProps = handle({
         activity.data.object,
         actorUser,
         { undo: true }
+      );
+    }
+    if (activity.data.type == "Create") {
+      return createInbox[activity.data.object.type](
+        activity.data.object,
+        actorUser
       );
     }
     return inbox[activity.data.type](activity.data, actorUser);
