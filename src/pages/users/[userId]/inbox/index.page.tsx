@@ -14,6 +14,10 @@ const inbox = {
   Accept: accept,
 } as const;
 
+const undoInbox = {
+  Follow: follow,
+};
+
 const keysOf = <T extends object>(obj: T) =>
   Object.keys(obj) as [keyof T, ...(keyof T)[]];
 
@@ -30,7 +34,7 @@ const anyActivitySchema = z.union([
       actor: z.string().url(),
       object: z
         .object({
-          type: z.enum(keysOf(inbox)),
+          type: z.enum(keysOf(undoInbox)),
         })
         .passthrough(),
     })
@@ -62,9 +66,11 @@ export const getServerSideProps = handle({
       return json({}, 400);
     }
     if (activity.data.type == "Undo") {
-      return inbox[activity.data.object.type](activity.data.object, actorUser, {
-        undo: true,
-      });
+      return undoInbox[activity.data.object.type](
+        activity.data.object,
+        actorUser,
+        { undo: true }
+      );
     }
     return inbox[activity.data.type](activity.data, actorUser);
   },

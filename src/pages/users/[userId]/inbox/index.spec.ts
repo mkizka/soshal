@@ -5,6 +5,7 @@ import { verifyActivity } from "../../../../utils/httpSignature/verify";
 import { createMockedContext } from "../../../__mocks__/context";
 import { follow } from "./follow";
 import { getServerSideProps } from "./index.page";
+import { logger } from "../../../../utils/logger";
 
 jest.mock("./follow");
 const mockedFollow = jest.mocked(follow).mockResolvedValue(json({}, 200));
@@ -14,6 +15,9 @@ const mockedFindOrFetchUserByActorId = jest.mocked(findOrFetchUserByActorId);
 
 jest.mock("../../../../utils/httpSignature/verify");
 const mockedVerifyActivity = jest.mocked(verifyActivity);
+
+jest.mock("../../../../utils/logger");
+const mockedLogger = jest.mocked(logger);
 
 const dummyRemoteUser: User = {
   id: "dummyidremote",
@@ -104,6 +108,9 @@ describe("ユーザーinbox", () => {
     // act
     await getServerSideProps(ctx);
     // assert
+    expect(mockedLogger.info).toHaveBeenCalledWith(
+      "actorで指定されたユーザーが見つかりませんでした"
+    );
     expect(ctx.res.statusCode).toBe(400);
   });
   test("ヘッダーの署名による検証が不正だった場合は400を返す", async () => {
@@ -123,6 +130,9 @@ describe("ユーザーinbox", () => {
       ctx.req.headers,
       dummyRemoteUser.publicKey
     );
+    expect(mockedLogger.info).toHaveBeenCalledWith(
+      expect.stringContaining("リクエストヘッダの署名が不正でした")
+    );
     expect(ctx.res.statusCode).toBe(400);
   });
   test("未実装のtypeの場合は400を返す", async () => {
@@ -135,6 +145,27 @@ describe("ユーザーinbox", () => {
     // act
     await getServerSideProps(ctx);
     // assert
+    expect(mockedLogger.info).toHaveBeenCalledWith(
+      expect.stringContaining("検証エラー")
+    );
+    expect(ctx.res.statusCode).toBe(400);
+  });
+  test("未実装のtypeのUndoには400を返す", async () => {
+    // arrange
+    const activity = {
+      type: "Undo",
+      actor: "https://remote.example.com/u/dummy_remote",
+      object: {
+        type: "Accept",
+      },
+    };
+    const ctx = createMockedActivityContext(activity);
+    // act
+    await getServerSideProps(ctx);
+    // assert
+    expect(mockedLogger.info).toHaveBeenCalledWith(
+      expect.stringContaining("検証エラー")
+    );
     expect(ctx.res.statusCode).toBe(400);
   });
   test("typeを持たないリクエストの場合は400を返す", async () => {
@@ -147,6 +178,9 @@ describe("ユーザーinbox", () => {
     // act
     await getServerSideProps(ctx);
     // assert
+    expect(mockedLogger.info).toHaveBeenCalledWith(
+      expect.stringContaining("検証エラー")
+    );
     expect(ctx.res.statusCode).toBe(400);
   });
 });
