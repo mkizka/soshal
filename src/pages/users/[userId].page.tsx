@@ -1,4 +1,4 @@
-import { User } from "@prisma/client";
+import type { User } from "@prisma/client";
 import type { GetServerSideProps, NextPage } from "next";
 import { activityStreams } from "../../utils/activitypub";
 import { api } from "../../utils/api";
@@ -8,7 +8,7 @@ type Props = {
   user: User;
 };
 
-const User: NextPage<Props> = ({ user }) => {
+const UserPage: NextPage<Props> = ({ user }) => {
   const mutation = api.follow.create.useMutation();
   return (
     <div>
@@ -22,7 +22,7 @@ const User: NextPage<Props> = ({ user }) => {
   );
 };
 
-export default User;
+export default UserPage;
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
