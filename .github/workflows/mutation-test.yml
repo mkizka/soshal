@@ -16,7 +16,7 @@ jobs:
           node-version: 18
           cache: pnpm
       - run: pnpm i
-      - run: pnpm stryker run --fileLogLevel trace
+      - run: SKIP_ENV_VALIDATION=1 pnpm stryker run --fileLogLevel trace
       - uses: actions/upload-artifact@v3
         with:
           name: stryker-js
