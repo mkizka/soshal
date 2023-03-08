@@ -1,0 +1,25 @@
+name: test
+
+on:
+  workflow_call:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 7
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: pnpm
+      - run: pnpm i
+      - run: pnpm stryker run --fileLogLevel trace
+      - uses: actions/upload-artifact@v3
+        with:
+          name: stryker-js
+          path: |
+            reports
+            stryker.log

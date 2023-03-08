@@ -32,6 +32,8 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.31.1",
+    "@stryker-mutator/core": "^6.4.1",
+    "@stryker-mutator/jest-runner": "^6.4.1",
     "@types/jest": "^29.2.6",
     "@types/node": "^18.11.18",
     "@types/react": "^18.0.26",
