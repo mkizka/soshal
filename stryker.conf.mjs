@@ -4,7 +4,7 @@ const config = {
   packageManager: "pnpm",
   reporters: ["progress", "html"],
   testRunner: "jest",
-  coverageAnalysis: "perTest",
+  coverageAnalysis: "off",
   plugins: ["@stryker-mutator/jest-runner"],
 };
 export default config;
