@@ -5,6 +5,14 @@ const config = {
   reporters: ["progress", "html"],
   testRunner: "jest",
   coverageAnalysis: "perTest",
+  mutate: [
+    "src/**/*.ts",
+    "!src/**/*.d.ts",
+    "!src/**/*.page.ts",
+    "!src/**/*.spec.ts",
+    "!src/**/fixtures/**/*.ts",
+    "!src/**/__mocks__/**/*.ts",
+  ],
   plugins: ["@stryker-mutator/jest-runner"],
 };
 export default config;
