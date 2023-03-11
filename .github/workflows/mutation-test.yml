@@ -22,7 +22,7 @@ jobs:
         run: |
           mv stryker.log reports/mutation/ 
           aws --endpoint-url https://minio-s3.paas.mkizka.dev s3 sync reports/mutation s3://soshal-mutation-test/pr${{ github.event.pull_request.number }}/
-      - uses: thollander/actions-comment-pull-request@v2
+      - uses: thollander/actions-comment-pull-request@v1
         if: ${{ github.event_name == 'pull_request' }}
         with:
           message: |
