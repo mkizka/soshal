@@ -17,9 +17,16 @@ jobs:
           cache: pnpm
       - run: pnpm i
       - run: SKIP_ENV_VALIDATION=1 pnpm stryker run --fileLogLevel trace
-      - uses: actions/upload-artifact@v3
+      - uses: unfor19/install-aws-cli-action@v2
+      - name: Upload reports
+        run: |
+          mv stryker.log reports/mutation/ 
+          aws --endpoint-url https://minio-s3.paas.mkizka.dev s3 sync reports/mutation s3://soshal-mutation-test/pr${{ github.event.pull_request.number }}/
+      - uses: thollander/actions-comment-pull-request@v2
+        if: ${{ github.event_name == 'pull_request' }}
         with:
-          name: stryker-js
-          path: |
-            reports
-            stryker.log
+          message: |
+            ミューテーションテスト結果が更新されました
+            :gun: [mutation.html](https://minio-s3.paas.mkizka.dev/soshal-mutation-test/pr${{ github.event.pull_request.number }}/mutation/mutation.html)
+            :page_facing_up: [stryker.log](https://minio-s3.paas.mkizka.dev/soshal-mutation-test/pr${{ github.event.pull_request.number }}/mutation/stryker.log)
+          comment_tag: link
