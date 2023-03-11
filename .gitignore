@@ -37,3 +37,8 @@ next-env.d.ts
 
 # typescript
 *.tsbuildinfo
+
+# stryker temp files
+.stryker-tmp
+reports
+stryker.log
