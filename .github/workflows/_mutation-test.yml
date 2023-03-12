@@ -52,4 +52,4 @@ jobs:
         if: ${{ github.event_name == 'pull_request' }}
         with:
           message: ${{ steps.diff-result.outputs.stdout }}
-          comment_tag: link
+          comment_tag: mutation-test-result
