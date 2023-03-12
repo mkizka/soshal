@@ -28,7 +28,7 @@ jobs:
       - name: download-reports
         run: |
           aws --endpoint-url https://minio-s3.paas.mkizka.dev s3 sync s3://${{ inputs.s3-basedir }} reports
-          if [ -d reports ]; then
+          if [ ! -e reports/stryker-incremental.json ]; then
             aws --endpoint-url https://minio-s3.paas.mkizka.dev s3 sync s3://soshal-mutation-test/main reports
           fi
       - run: SKIP_ENV_VALIDATION=1 pnpm stryker run --fileLogLevel trace
