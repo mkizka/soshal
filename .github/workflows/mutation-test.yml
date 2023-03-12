@@ -3,7 +3,7 @@ name: mutation-test
 on:
   pull_request:
 
-environment:
+env:
   AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
