@@ -42,6 +42,8 @@ jobs:
         uses: gh640/command-result-action@v1
         if: ${{ github.event_name == 'pull_request' }}
         id: diff-result
+        env:
+          MUTATION_TEST_S3_BASEURL: ${{ inputs.s3-baseurl }}
         with:
           command: pnpm ts-node -P ci/tsconfig.json ci/report-mutation-test-pr.ts
       - uses: thollander/actions-comment-pull-request@v2
