@@ -26,9 +26,11 @@ jobs:
           cache: pnpm
       - run: pnpm i
       - name: download-reports
-        continue-on-error: true
         run: |
           aws --endpoint-url https://minio-s3.paas.mkizka.dev s3 sync s3://${{ inputs.s3-basedir }} reports
+          if [ ! -e reports/stryker-incremental.json ]; then
+            aws --endpoint-url https://minio-s3.paas.mkizka.dev s3 sync s3://soshal-mutation-test/main reports
+          fi
       - run: SKIP_ENV_VALIDATION=1 pnpm stryker run --fileLogLevel trace
       - name: upload-reports
         run: |
