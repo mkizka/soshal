@@ -33,7 +33,7 @@ export const followRouter = createTRPCRouter({
             activity: activityStreams.follow(follow, followee.actorUrl),
             privateKey: ctx.session.user.privateKey,
             // TODO: idだけ渡せばいいようにしたい
-            publicKeyId: `https://${env.HOST}/users/${ctx.session.user.id}`,
+            publicKeyId: `https://${env.HOST}/users/${ctx.session.user.id}#main-key`,
           },
         });
       }
