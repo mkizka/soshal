@@ -6,6 +6,7 @@ const config = {
   testRunner: "jest",
   coverageAnalysis: "perTest",
   incremental: true,
+  timeoutMS: 30000,
   mutate: [
     "src/**/*.ts",
     "!src/**/*.d.ts",
