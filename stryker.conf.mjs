@@ -5,6 +5,7 @@ const config = {
   reporters: ["progress", "html"],
   testRunner: "jest",
   coverageAnalysis: "perTest",
+  incremental: true,
   mutate: [
     "src/**/*.ts",
     "!src/**/*.d.ts",
