@@ -3,7 +3,7 @@ name: _mutation-test
 on:
   workflow_call:
     inputs:
-      s3-baseurl:
+      s3-basedir:
         type: string
         required: true
 
