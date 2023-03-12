@@ -21,12 +21,13 @@ jobs:
           node-version: 18
           cache: pnpm
       - run: pnpm i
-      - name: Download reports
+      - name: download-reports
+        continue-on-error: true
         run: |
           aws --endpoint-url https://minio-s3.paas.mkizka.dev s3 sync s3://soshal-mutation-test/pr${{ github.event.pull_request.number }}/ reports
       - run: SKIP_ENV_VALIDATION=1 pnpm stryker run --fileLogLevel trace
       - uses: unfor19/install-aws-cli-action@v1
-      - name: Upload reports
+      - name: upload-reports
         run: |
           mv stryker.log reports/
           aws --endpoint-url https://minio-s3.paas.mkizka.dev s3 sync reports s3://soshal-mutation-test/pr${{ github.event.pull_request.number }}/
