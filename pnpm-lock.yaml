@@ -12,6 +12,7 @@ specifiers:
   '@next-auth/prisma-adapter': ^1.0.5
   '@playwright/test': ^1.31.1
   '@prisma/client': ^4.11.0
+  '@stryker-mutator/api': ^6.4.1
   '@stryker-mutator/core': ^6.4.1
   '@stryker-mutator/jest-runner': ^6.4.1
   '@tanstack/react-query': ^4.20.0
@@ -66,6 +67,7 @@ dependencies:
 
 devDependencies:
   '@playwright/test': 1.31.1
+  '@stryker-mutator/api': 6.4.1
   '@stryker-mutator/core': 6.4.1
   '@stryker-mutator/jest-runner': 6.4.1_voebic7tsm3k7rk6ezzaimtxri
   '@types/jest': 29.2.6
