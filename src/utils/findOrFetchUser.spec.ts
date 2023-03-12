@@ -33,13 +33,6 @@ const dummyPerson: AP.Person = {
   },
 };
 
-jest.mock("../utils/env", () => ({
-  env: {
-    ...process.env,
-    HOST: "myhost.example.com",
-  },
-}));
-
 describe("findOrFetchUser", () => {
   describe("正常系(ローカルユーザー)", () => {
     test("hostの指定がなければDBから取得する", async () => {
