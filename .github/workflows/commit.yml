@@ -11,7 +11,7 @@ jobs:
   mutation-test-prod:
     uses: ./.github/workflows/_mutation-test.yml
     with:
-      s3-baseurl: s3://soshal-mutation-test/main
+      s3-basedir: soshal-mutation-test/main
     secrets: inherit
   deploy-prod:
     uses: ./.github/workflows/_deploy.yml

@@ -28,12 +28,12 @@ jobs:
       - name: download-reports
         continue-on-error: true
         run: |
-          aws --endpoint-url https://minio-s3.paas.mkizka.dev s3 sync ${{ inputs.s3-baseurl }} reports
+          aws --endpoint-url https://minio-s3.paas.mkizka.dev s3 sync s3://${{ inputs.s3-basedir }} reports
       - run: SKIP_ENV_VALIDATION=1 pnpm stryker run --fileLogLevel trace
       - name: upload-reports
         run: |
           mv stryker.log reports/
-          aws --endpoint-url https://minio-s3.paas.mkizka.dev s3 sync reports ${{ inputs.s3-baseurl }}
+          aws --endpoint-url https://minio-s3.paas.mkizka.dev s3 sync reports s3://${{ inputs.s3-basedir }}
       - name: download-reports-main
         if: ${{ github.event_name == 'pull_request' }}
         run: |
@@ -43,7 +43,7 @@ jobs:
         if: ${{ github.event_name == 'pull_request' }}
         id: diff-result
         env:
-          MUTATION_TEST_S3_BASEURL: ${{ inputs.s3-baseurl }}
+          MUTATION_TEST_S3_BASEURL: https://minio-s3.paas.mkizka.dev/${{ inputs.s3-basedir }}
         with:
           command: pnpm ts-node -P ci/tsconfig.json ci/report-mutation-test-pr.ts
       - uses: thollander/actions-comment-pull-request@v2
