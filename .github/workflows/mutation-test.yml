@@ -24,18 +24,24 @@ jobs:
       - name: download-reports
         continue-on-error: true
         run: |
-          aws --endpoint-url https://minio-s3.paas.mkizka.dev s3 sync s3://soshal-mutation-test/pr${{ github.event.pull_request.number }}/ reports
+          aws --endpoint-url https://minio-s3.paas.mkizka.dev s3 sync s3://soshal-mutation-test/pr${{ github.event.pull_request.number }} reports
       - run: SKIP_ENV_VALIDATION=1 pnpm stryker run --fileLogLevel trace
-      - uses: unfor19/install-aws-cli-action@v1
       - name: upload-reports
         run: |
           mv stryker.log reports/
-          aws --endpoint-url https://minio-s3.paas.mkizka.dev s3 sync reports s3://soshal-mutation-test/pr${{ github.event.pull_request.number }}/
+          aws --endpoint-url https://minio-s3.paas.mkizka.dev s3 sync reports s3://soshal-mutation-test/pr${{ github.event.pull_request.number }}
+      - name: download-reports-main
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          aws --endpoint-url https://minio-s3.paas.mkizka.dev s3 sync s3://soshal-mutation-test/main reports-main
+      - name: show-diff-result
+        uses: mathiasvr/command-output@v1
+        if: ${{ github.event_name == 'pull_request' }}
+        id: diff-result
+        with:
+          run: pnpm ts-node -P ci/tsconfig.json ci/report-mutation-test-pr.ts
       - uses: thollander/actions-comment-pull-request@v2
         if: ${{ github.event_name == 'pull_request' }}
         with:
-          message: |
-            ミューテーションテスト結果が更新されました
-            :gun: [mutation.html](https://minio-s3.paas.mkizka.dev/soshal-mutation-test/pr${{ github.event.pull_request.number }}/mutation/mutation.html)
-            :page_facing_up: [stryker.log](https://minio-s3.paas.mkizka.dev/soshal-mutation-test/pr${{ github.event.pull_request.number }}/stryker.log)
+          message: ${{ steps.diff-result.outputs.stdout }}
           comment_tag: link

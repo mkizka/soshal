@@ -2,7 +2,7 @@
 /** @type {import('@stryker-mutator/api/core').PartialStrykerOptions} */
 const config = {
   packageManager: "pnpm",
-  reporters: ["progress", "html"],
+  reporters: ["progress", "html", "json"],
   testRunner: "jest",
   coverageAnalysis: "perTest",
   incremental: true,
