@@ -9,7 +9,7 @@ jobs:
   mutation-test-pr:
     uses: ./.github/workflows/_mutation-test.yml
     with:
-      s3-baseurl: s3://soshal-mutation-test/main
+      s3-baseurl: s3://soshal-mutation-test/pr${{ github.event.pull_request.number }}
     secrets: inherit
   # deploy-pr:
   #   uses: ./.github/workflows/_deploy.yml
