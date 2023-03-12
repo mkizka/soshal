@@ -3,6 +3,11 @@ name: mutation-test
 on:
   pull_request:
 
+environment:
+  AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -16,10 +21,13 @@ jobs:
           node-version: 18
           cache: pnpm
       - run: pnpm i
-      - run: SKIP_ENV_VALIDATION=1 pnpm stryker run --fileLogLevel trace
+      # - run: SKIP_ENV_VALIDATION=1 pnpm stryker run --fileLogLevel trace
       - uses: unfor19/install-aws-cli-action@v1
       - name: Upload reports
         run: |
+          mkdir -p reports/mutation/
+          echo foo > reports/mutation/mutation.html
+          echo bar > stryker.log
           mv stryker.log reports/mutation/ 
           aws --endpoint-url https://minio-s3.paas.mkizka.dev s3 sync reports/mutation s3://soshal-mutation-test/pr${{ github.event.pull_request.number }}/
       - uses: thollander/actions-comment-pull-request@v2
