@@ -69,4 +69,4 @@ const text = `${table()}
 :gun: [mutation.html](${baseUrl}/mutation/mutation.html)
 :page_facing_up: [stryker.log](${baseUrl}/stryker.log)`;
 
-console.log(text.replace("\n"));
+console.log(text);

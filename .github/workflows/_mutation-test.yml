@@ -1,7 +1,11 @@
-name: mutation-test
+name: _mutation-test
 
 on:
-  pull_request:
+  workflow_call:
+    inputs:
+      s3-baseurl:
+        type: string
+        required: true
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -24,22 +28,22 @@ jobs:
       - name: download-reports
         continue-on-error: true
         run: |
-          aws --endpoint-url https://minio-s3.paas.mkizka.dev s3 sync s3://soshal-mutation-test/pr${{ github.event.pull_request.number }} reports
+          aws --endpoint-url https://minio-s3.paas.mkizka.dev s3 sync ${{ inputs.s3-baseurl }} reports
       - run: SKIP_ENV_VALIDATION=1 pnpm stryker run --fileLogLevel trace
       - name: upload-reports
         run: |
           mv stryker.log reports/
-          aws --endpoint-url https://minio-s3.paas.mkizka.dev s3 sync reports s3://soshal-mutation-test/pr${{ github.event.pull_request.number }}
+          aws --endpoint-url https://minio-s3.paas.mkizka.dev s3 sync reports ${{ inputs.s3-baseurl }}
       - name: download-reports-main
         if: ${{ github.event_name == 'pull_request' }}
         run: |
           aws --endpoint-url https://minio-s3.paas.mkizka.dev s3 sync s3://soshal-mutation-test/main reports-main
       - name: show-diff-result
-        uses: mathiasvr/command-output@v1
+        uses: gh640/command-result-action@v1
         if: ${{ github.event_name == 'pull_request' }}
         id: diff-result
         with:
-          run: pnpm ts-node -P ci/tsconfig.json ci/report-mutation-test-pr.ts
+          command: pnpm ts-node -P ci/tsconfig.json ci/report-mutation-test-pr.ts
       - uses: thollander/actions-comment-pull-request@v2
         if: ${{ github.event_name == 'pull_request' }}
         with:
