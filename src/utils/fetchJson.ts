@@ -9,6 +9,7 @@ export const fetchJson = async <T extends object>(
   try {
     return await got<T>(url, {
       ...options,
+      // Stryker disable next-line BooleanLiteral
       isStream: false,
       resolveBodyOnly: false,
       responseType: "json",

@@ -1,0 +1,53 @@
+name: _mutation-test
+
+on:
+  workflow_call:
+    inputs:
+      s3-basedir:
+        type: string
+        required: true
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 7
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: pnpm
+      - run: pnpm i
+      - name: download-reports
+        continue-on-error: true
+        run: |
+          aws --endpoint-url https://minio-s3.paas.mkizka.dev s3 sync s3://${{ inputs.s3-basedir }} reports
+      - run: SKIP_ENV_VALIDATION=1 pnpm stryker run --fileLogLevel trace
+      - name: upload-reports
+        run: |
+          mv stryker.log reports/
+          aws --endpoint-url https://minio-s3.paas.mkizka.dev s3 sync reports s3://${{ inputs.s3-basedir }}
+      - name: download-reports-main
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          aws --endpoint-url https://minio-s3.paas.mkizka.dev s3 sync s3://soshal-mutation-test/main reports-main
+      - name: show-diff-result
+        uses: gh640/command-result-action@v1
+        if: ${{ github.event_name == 'pull_request' }}
+        id: diff-result
+        env:
+          MUTATION_TEST_S3_BASEURL: https://minio-s3.paas.mkizka.dev/${{ inputs.s3-basedir }}
+        with:
+          command: pnpm ts-node -P ci/tsconfig.json ci/report-mutation-test-pr.ts
+      - uses: thollander/actions-comment-pull-request@v2
+        if: ${{ github.event_name == 'pull_request' }}
+        with:
+          message: ${{ steps.diff-result.outputs.stdout }}
+          comment_tag: link

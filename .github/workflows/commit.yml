@@ -8,6 +8,11 @@ on:
 jobs:
   test-prod:
     uses: ./.github/workflows/_test.yml
+  mutation-test-prod:
+    uses: ./.github/workflows/_mutation-test.yml
+    with:
+      s3-basedir: soshal-mutation-test/main
+    secrets: inherit
   deploy-prod:
     uses: ./.github/workflows/_deploy.yml
     needs: test-prod
