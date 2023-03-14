@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: pnpm/action-setup@v2
         with:
-          version: 7
+          version: 7.29.1
       - uses: actions/setup-node@v3
         with:
           node-version: 18
@@ -47,7 +47,7 @@ jobs:
         env:
           MUTATION_TEST_S3_BASEURL: https://minio-s3.paas.mkizka.dev/${{ inputs.s3-basedir }}
         with:
-          command: pnpm ts-node -P ci/tsconfig.json ci/report-mutation-test-pr.ts
+          command: ./ci/report-mutation-test-pr.mts
       - uses: thollander/actions-comment-pull-request@v2
         if: ${{ github.event_name == 'pull_request' }}
         with:

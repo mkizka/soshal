@@ -11,10 +11,10 @@ jobs:
     with:
       s3-basedir: soshal-mutation-test/pr${{ github.event.pull_request.number }}
     secrets: inherit
-  # deploy-pr:
-  #   uses: ./.github/workflows/_deploy.yml
-  #   needs: test-pr
-  #   with:
-  #     app-name: pr${{ github.event.pull_request.number }}-soshal
-  #     docker-name: soshal:pr${{ github.event.pull_request.number }}
-  #   secrets: inherit
+  deploy-pr:
+    uses: ./.github/workflows/_deploy.yml
+    needs: test-pr
+    with:
+      app-name: pr${{ github.event.pull_request.number }}-soshal
+      docker-name: soshal:pr${{ github.event.pull_request.number }}
+    secrets: inherit
