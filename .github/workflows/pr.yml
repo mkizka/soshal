@@ -20,6 +20,9 @@ jobs:
     secrets: inherit
   cleanup-resources:
     runs-on: ubuntu-latest
+    env:
+      CAPROVER_URL: paas.mkizka.dev
+      CAPROVER_PASSWORD: ${{ secrets.CAPROVER_PASSWORD }}
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3

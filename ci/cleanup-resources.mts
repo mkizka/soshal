@@ -11,7 +11,7 @@ const { stdout: prNumbers } =
   await $`gh pr list --json number | jq '.[].number'`;
 
 const deleteUnuseApps = async () => {
-  await $`npx caprover api -m GET -d "" -t /user/apps/appDefinitions -u paas.mkizka.dev -p com0806cap -o ${tmpFile}`;
+  await $`npx caprover api -m GET -d "" -t /user/apps/appDefinitions -u ${process.env.CAPROVER_URL} -p ${process.env.CAPROVER_PASSWORD} -o ${tmpFile}`;
   const { stdout: appNames } =
     await $`jq -r '.appDefinitions | map(.appName) | .[]' < ${tmpFile}`;
 
@@ -33,7 +33,7 @@ const deleteUnuseDirs = async () => {
 
 for (const appName of await deleteUnuseApps()) {
   const data = JSON.stringify({ appName, volumes: [] });
-  await $`npx caprover api -m POST -d ${data} -t /user/apps/appDefinitions/delete -u paas.mkizka.dev -p com0806cap`;
+  await $`npx caprover api -m POST -d ${data} -t /user/apps/appDefinitions/delete -u ${process.env.CAPROVER_URL} -p ${process.env.CAPROVER_PASSWORD}`;
 }
 
 for (const dir of await deleteUnuseDirs()) {
