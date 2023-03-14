@@ -23,7 +23,7 @@ const deleteUnuseApps = async () => {
 
 const deleteUnuseDirs = async () => {
   const { stdout: s3dirs } =
-    await $`aws --profile minio --endpoint-url https://minio-s3.paas.mkizka.dev s3 ls s3://soshal-mutation-test | awk '{print $2}'`;
+    await $`aws --endpoint-url https://minio-s3.paas.mkizka.dev s3 ls s3://soshal-mutation-test | awk '{print $2}'`;
 
   const dirNameToUse = prNumbers.split("\n").map((n) => `pr${n}/`);
   return s3dirs
@@ -37,5 +37,5 @@ for (const appName of await deleteUnuseApps()) {
 }
 
 for (const dir of await deleteUnuseDirs()) {
-  await $`aws --profile minio --endpoint-url https://minio-s3.paas.mkizka.dev s3 rm --recursive s3://soshal-mutation-test/${dir}`;
+  await $`aws --endpoint-url https://minio-s3.paas.mkizka.dev s3 rm --recursive s3://soshal-mutation-test/${dir}`;
 }
