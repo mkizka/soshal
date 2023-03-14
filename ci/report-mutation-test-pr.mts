@@ -1,3 +1,4 @@
+#!/usr/bin/env -S pnpm -s dlx tsx
 import fs from "fs";
 
 type Result = {
