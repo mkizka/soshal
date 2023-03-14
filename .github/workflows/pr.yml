@@ -23,6 +23,7 @@ jobs:
     env:
       CAPROVER_URL: paas.mkizka.dev
       CAPROVER_PASSWORD: ${{ secrets.CAPROVER_PASSWORD }}
+      GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v3
       - uses: pnpm/action-setup@v2
