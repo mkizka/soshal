@@ -18,3 +18,11 @@ jobs:
       app-name: pr${{ github.event.pull_request.number }}-soshal
       docker-name: soshal:pr${{ github.event.pull_request.number }}
     secrets: inherit
+  cleanup-resources:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - run: ./ci/cleanup-resources.ts
